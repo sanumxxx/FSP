@@ -1,0 +1,89 @@
+{# templates/admin/partners/create.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Добавление партнера | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Добавление партнера{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Добавление партнера</span>
+        <a href="{{ url_for('admin_partners_list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку
+        </a>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('admin_partners_create') }}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="name" class="form-label">Название организации</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="website" class="form-label">Веб-сайт</label>
+                <input type="url" class="form-control" id="website" name="website" placeholder="https://">
+                <div class="form-text">Необязательно. Полный URL включая http:// или https://</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание</label>
+                <textarea class="form-control" id="description" name="description" rows="6"></textarea>
+                <div class="form-text">Краткая информация о партнере и характере сотрудничества</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="logo" class="form-label">Логотип</label>
+                <input class="form-control" type="file" id="logo" name="logo" accept="image/*">
+                <div class="form-text">Рекомендуемый размер: 300x200px. Допустимые форматы: JPG, PNG, GIF.</div>
+                <div id="logo_preview" class="mt-2"></div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ru-RU.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Инициализация редактора Summernote
+        $('#description').summernote({
+            height: 200,
+            lang: 'ru-RU',
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+
+        // Предпросмотр логотипа
+        $('#logo').change(function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#logo_preview').html('<img src="' + e.target.result + '" class="img-thumbnail" style="max-height: 200px;">');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>
+{% endblock %}

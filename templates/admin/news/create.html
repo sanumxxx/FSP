@@ -1,0 +1,75 @@
+<!-- templates/admin/news/create.html -->
+{% extends 'admin/base.html' %}
+
+{% block title %}Добавление новости | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Добавление новости{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Добавление новости</span>
+        <a href="{{ url_for('admin_news_list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку
+        </a>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('admin_news_create') }}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="title" class="form-label">Заголовок</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="content" class="form-label">Содержание</label>
+                <textarea class="form-control" id="content" name="content" rows="10" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Изображение</label>
+                <input class="form-control" type="file" id="image" name="image" accept="image/*">
+                <div class="form-text">Рекомендуемый размер: 800x400px. Допустимые форматы: JPG, PNG, GIF.</div>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="published" name="published" checked>
+                    <label class="form-check-label" for="published">Опубликовать</label>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ru-RU.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#content').summernote({
+            height: 300,
+            lang: 'ru-RU',
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
+        });
+    });
+</script>
+{% endblock %}

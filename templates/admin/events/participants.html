@@ -1,0 +1,526 @@
+{# templates/admin/events/participants.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Участники мероприятия | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Участники мероприятия{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.19.1/dist/bootstrap-table.min.css" rel="stylesheet">
+<style>
+    .table-success {
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+    .table-warning {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+    .table-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0">{{ event.title }}</h5>
+            <div class="text-muted small">{{ event.start_date.strftime('%d.%m.%Y %H:%M') }} - {{ event.end_date.strftime('%d.%m.%Y %H:%M') }}</div>
+        </div>
+        <div>
+            <a href="{{ url_for('admin_events_edit', id=event.id) }}" class="btn btn-outline-primary btn-sm me-2">
+                <i class="bi bi-pencil"></i> Редактировать мероприятие
+            </a>
+            <a href="{{ url_for('admin_events_list') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> К списку мероприятий
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Список участников -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Список участников</span>
+                <div>
+                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addParticipantModal">
+                        <i class="bi bi-plus"></i> Добавить участника
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="btn-export-csv">
+                        <i class="bi bi-download"></i> Экспорт CSV
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table
+                        id="participants-table"
+                        data-toggle="table"
+                        data-search="true"
+                        data-pagination="true"
+                        data-page-size="15"
+                        data-sort-name="place"
+                        data-sort-order="asc"
+                        class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th data-sortable="true" data-field="place">Место</th>
+                                <th data-sortable="true" data-field="name">Участник</th>
+                                <th data-sortable="true" data-field="organization">Организация</th>
+                                <th data-sortable="true" data-field="city">Город</th>
+                                <th data-sortable="true" data-field="score">Баллы</th>
+                                <th data-sortable="true" data-field="rating_change">Δ Рейтинг</th>
+                                <th data-field="actions">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for participant in participants %}
+                            <tr class="{% if participant.place == 1 %}table-success{% elif participant.place == 2 or participant.place == 3 %}table-warning{% endif %}">
+                                <td>{{ participant.place if participant.place else '-' }}</td>
+                                <td>
+                                    <a href="{{ url_for('admin_participants_edit', id=participant['participant_id']) }}" target="_blank">
+    {{ participant['participant_name'] }}
+</a>
+                                </td>
+                                <td>{{ participant['place'] if participant['place'] else '-' }}</td>
+<td>{{ participant['organization'] }}</td>
+<td>{{ participant['city'] }}</td>
+<td>{{ participant['score'] }}</td>
+<td>
+    {% if participant['rating_change'] > 0 %}
+        <span class="text-success">+{{ participant['rating_change'] }}</span>
+    {% elif participant['rating_change'] < 0 %}
+        <span class="text-danger">{{ participant['rating_change'] }}</span>
+    {% else %}
+        0
+    {% endif %}
+</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-participant"
+                                        data-id="{{ participant.id }}"
+                                        data-participant-id="{{ participant.participant_id }}"
+                                        data-place="{{ participant.place }}"
+                                        data-score="{{ participant.score }}"
+                                        data-rating-change="{{ participant.rating_change }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-participant"
+                                        data-id="{{ participant.id }}"
+                                        data-name="{{ participant.participant_name }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика и фильтры -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <span>Статистика участия</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Всего участников:</span>
+                        <strong>{{ participants|length }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Организаций:</span>
+                        <strong>{{ participants|map(attribute='organization')|unique|list|length }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-1">
+                        <span>Городов:</span>
+                        <strong>{{ participants|map(attribute='city')|unique|list|length }}</strong>
+                    </div>
+                </div>
+                <div class="progress" style="height: 20px;">
+                    <div class="progress-bar bg-success" style="width: 15%;" title="1 место">15%</div>
+                    <div class="progress-bar bg-warning" style="width: 30%;" title="2-3 места">30%</div>
+                    <div class="progress-bar bg-primary" style="width: 55%;" title="Участники">55%</div>
+                </div>
+                <div class="mt-1 text-muted small text-center">Распределение призовых мест</div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <span>Фильтры</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Город</label>
+                    <select class="form-select" id="filter-city">
+                        <option value="">Все города</option>
+                        {% for city in participants|map(attribute='city')|unique|list %}
+                        <option value="{{ city }}">{{ city }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Организация</label>
+                    <select class="form-select" id="filter-organization">
+                        <option value="">Все организации</option>
+                        {% for org in participants|map(attribute='organization')|unique|list %}
+                        <option value="{{ org }}">{{ org }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Результаты</label>
+                    <select class="form-select" id="filter-results">
+                        <option value="">Все участники</option>
+                        <option value="winners">Призеры (1-3 места)</option>
+                        <option value="top10">Топ-10</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary w-100" id="apply-filters">
+                    <i class="bi bi-funnel"></i> Применить фильтры
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span>Инструменты</span>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#calculateRatingModal">
+                        <i class="bi bi-calculator"></i> Рассчитать рейтинг
+                    </button>
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#importParticipantsModal">
+                        <i class="bi bi-upload"></i> Импорт участников
+                    </button>
+                    <button class="btn btn-outline-secondary" id="clear-results">
+                        <i class="bi bi-x-circle"></i> Сбросить результаты
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления участника -->
+<div class="modal fade" id="addParticipantModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить участника</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-participant-form" action="{{ url_for('admin_event_add_participant', event_id=event.id) }}" method="post">
+                    <div class="mb-3">
+                        <label for="participant_id" class="form-label">Участник</label>
+                        <select class="form-select" id="participant_id" name="participant_id" required>
+                            <option value="">Выберите участника</option>
+                            {% for p in all_participants %}
+                            <option value="{{ p.id }}">{{ p.name }} ({{ p.city }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="place" class="form-label">Место</label>
+                        <input type="number" class="form-control" id="place" name="place" min="1">
+                        <div class="form-text">Оставьте пустым, если участник не занял призовое место</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="score" class="form-label">Баллы</label>
+                        <input type="number" class="form-control" id="score" name="score" value="0" step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="rating_change" class="form-label">Изменение рейтинга</label>
+                        <input type="number" class="form-control" id="rating_change" name="rating_change" value="0">
+                        <div class="form-text">Положительное или отрицательное число</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="add-participant-form" class="btn btn-primary">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования участника -->
+<div class="modal fade" id="editParticipantModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактировать результаты участника</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-participant-form" action="{{ url_for('admin_event_update_participant', event_id=event.id) }}" method="post">
+                    <input type="hidden" id="edit_id" name="id">
+                    <div class="mb-3">
+                        <label for="edit_participant_id" class="form-label">Участник</label>
+                        <select class="form-select" id="edit_participant_id" name="participant_id" required disabled>
+                            {% for p in all_participants %}
+                            <option value="{{ p.id }}">{{ p.name }} ({{ p.city }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_place" class="form-label">Место</label>
+                        <input type="number" class="form-control" id="edit_place" name="place" min="1">
+                        <div class="form-text">Оставьте пустым, если участник не занял призовое место</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_score" class="form-label">Баллы</label>
+                        <input type="number" class="form-control" id="edit_score" name="score" step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_rating_change" class="form-label">Изменение рейтинга</label>
+                        <input type="number" class="form-control" id="edit_rating_change" name="rating_change">
+                        <div class="form-text">Положительное или отрицательное число</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="edit-participant-form" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления участника -->
+<div class="modal fade" id="deleteParticipantModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить участника <span id="delete-participant-name" class="fw-bold"></span> из этого мероприятия?</p>
+                <p class="text-muted">Это действие не удалит самого участника из базы данных, а только открепит его от этого мероприятия.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form id="delete-participant-form" action="{{ url_for('admin_event_remove_participant', event_id=event.id) }}" method="post">
+                    <input type="hidden" id="delete_id" name="id">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно рассчета рейтинга -->
+<div class="modal fade" id="calculateRatingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Рассчет рейтинга</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="calculate-rating-form" action="{{ url_for('admin_event_calculate_rating', event_id=event.id) }}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Метод расчета</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="rating_method" id="method_standard" value="standard" checked>
+                            <label class="form-check-label" for="method_standard">
+                                Стандартный (на основе занятого места)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="rating_method" id="method_score" value="score">
+                            <label class="form-check-label" for="method_score">
+                                На основе набранных баллов
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="event_weight" class="form-label">Вес мероприятия</label>
+                        <select class="form-select" id="event_weight" name="event_weight">
+                            <option value="1">1 - Обычное мероприятие</option>
+                            <option value="2">2 - Региональное значение</option>
+                            <option value="3">3 - Важное мероприятие</option>
+                            <option value="4">4 - Межрегиональное значение</option>
+                            <option value="5">5 - Национальное значение</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="first_place_points" class="form-label">Очки за 1 место</label>
+                        <input type="number" class="form-control" id="first_place_points" name="first_place_points" value="100">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="apply_immediately" name="apply_immediately">
+                        <label class="form-check-label" for="apply_immediately">
+                            Применить изменения рейтинга сразу
+                        </label>
+                        <div class="form-text">Если не выбрано, будет показан предварительный расчет</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="calculate-rating-form" class="btn btn-primary">Рассчитать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно импорта участников -->
+<div class="modal fade" id="importParticipantsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Импорт участников</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="import-participants-form" action="{{ url_for('admin_event_import_participants', event_id=event.id) }}" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="participants_file" class="form-label">Файл с участниками (CSV)</label>
+                        <input class="form-control" type="file" id="participants_file" name="participants_file" accept=".csv" required>
+                        <div class="form-text">
+                            Формат CSV: Имя,Организация,Город,Место,Баллы<br>
+                            Пример: Иванов Иван,МГТУ,Москва,1,95.5
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="create_missing" name="create_missing" checked>
+                        <label class="form-check-label" for="create_missing">
+                            Создавать отсутствующих участников
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="overwrite_existing" name="overwrite_existing">
+                        <label class="form-check-label" for="overwrite_existing">
+                            Перезаписывать существующих участников
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="import-participants-form" class="btn btn-primary">Импортировать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения сброса результатов -->
+<div class="modal fade" id="confirmClearModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение сброса</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите сбросить все результаты и изменения рейтинга для этого мероприятия?</p>
+                <p class="text-danger fw-bold">Это действие нельзя отменить!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form action="{{ url_for('admin_event_clear_results', event_id=event.id) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Сбросить все результаты</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.19.1/dist/bootstrap-table.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/tableExport.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.19.1/dist/extensions/export/bootstrap-table-export.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Инициализация таблицы участников
+        const $table = $('#participants-table');
+
+        // Фильтрация по городу и организации
+        $('#apply-filters').click(function() {
+            const cityFilter = $('#filter-city').val();
+            const orgFilter = $('#filter-organization').val();
+            const resultsFilter = $('#filter-results').val();
+
+            $table.bootstrapTable('filterBy', {
+                city: cityFilter,
+                organization: orgFilter
+            }, {
+                'filterAlgorithm': function(row, filters) {
+                    let match = true;
+
+                    if (filters.city && row.city !== filters.city) {
+                        match = false;
+                    }
+
+                    if (filters.organization && row.organization !== filters.organization) {
+                        match = false;
+                    }
+
+                    if (resultsFilter === 'winners' && (row.place > 3 || !row.place)) {
+                        match = false;
+                    }
+
+                    if (resultsFilter === 'top10' && (row.place > 10 || !row.place)) {
+                        match = false;
+                    }
+
+                    return match;
+                }
+            });
+        });
+
+        // Экспорт в CSV
+        $('#btn-export-csv').click(function() {
+            $table.tableExport({
+                type: 'csv',
+                fileName: 'participants_' + {{ event.id }},
+                exportDataType: 'all'
+            });
+        });
+
+        // Обработка редактирования участника
+        $('.edit-participant').click(function() {
+            const id = $(this).data('id');
+            const participantId = $(this).data('participant-id');
+            const place = $(this).data('place');
+            const score = $(this).data('score');
+            const ratingChange = $(this).data('rating-change');
+
+            $('#edit_id').val(id);
+            $('#edit_participant_id').val(participantId);
+            $('#edit_place').val(place || '');
+            $('#edit_score').val(score);
+            $('#edit_rating_change').val(ratingChange);
+
+            $('#editParticipantModal').modal('show');
+        });
+
+        // Обработка удаления участника
+        $('.delete-participant').click(function() {
+            const id = $(this).data('id');
+            const name = $(this).data('name');
+
+            $('#delete_id').val(id);
+            $('#delete-participant-name').text(name);
+
+            $('#deleteParticipantModal').modal('show');
+        });
+
+        // Подтверждение сброса результатов
+        $('#clear-results').click(function() {
+            $('#confirmClearModal').modal('show');
+        });
+    });
+</script>
+{% endblock %}

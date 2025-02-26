@@ -1,0 +1,302 @@
+{# templates/participants.html #}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Рейтинг участников - Федерация спортивного программирования МО</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#a78bfa', // Lighter Purple
+                            DEFAULT: '#8b5cf6', // Tailwind Indigo-500 (Purple)
+                            dark: '#6b46c1'      // Darker Purple
+                        }
+                    },
+                    fontFamily: {
+                        'code': ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+
+        .nav-link:hover {
+            color: #a78bfa;
+        }
+
+        .tab-active {
+            background-color: #8b5cf6;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <header class="fixed w-full bg-black z-40 backdrop-blur-sm bg-opacity-90">
+        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{{ url_for('home') }}" class="text-white text-xl font-bold hover:scale-105 transition-transform flex items-center">
+                <span class="mr-2 text-primary-light"><i class="fas fa-laptop-code"></i></span>
+                ФСПМО
+            </a>
+            <div class="hidden lg:flex space-x-8">
+                <a href="{{ url_for('home') }}#about" class="text-white nav-link transition-colors">О Федерации</a>
+                <a href="{{ url_for('home') }}#disciplines" class="text-white nav-link transition-colors">Дисциплины</a>
+                <a href="{{ url_for('events_list') }}" class="text-white nav-link transition-colors">Мероприятия</a>
+                <a href="{{ url_for('participants_list') }}" class="text-white nav-link transition-colors">Рейтинг</a>
+                <a href="{{ url_for('news_list') }}" class="text-white nav-link transition-colors">Новости</a>
+                <a href="{{ url_for('home') }}#partners" class="text-white nav-link transition-colors">Партнеры</a>
+                <a href="{{ url_for('contacts') }}" class="text-white nav-link transition-colors">Контакты</a>
+
+                <!-- Используем переменную is_authenticated вместо session -->
+                {% if is_authenticated %}
+                <a href="{{ url_for('admin_dashboard') }}" class="flex items-center text-white px-3 py-1.5 bg-primary-DEFAULT rounded hover:bg-primary-dark transition-colors">
+                    <i class="fas fa-cog mr-1"></i>
+                    <span>Управление</span>
+                </a>
+                {% endif %}
+            </div>
+            <button id="mobile-menu-button" class="text-white text-2xl lg:hidden">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Мобильное меню -->
+    <div id="mobile-menu" class="fixed w-full h-screen bg-black z-50 hidden lg:hidden">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex justify-between items-center mb-8">
+                <a href="{{ url_for('home') }}" class="text-white text-xl font-bold">ФСПМО</a>
+                <button id="close-menu" class="text-white text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="flex flex-col space-y-6">
+                <a href="{{ url_for('home') }}#about" class="text-white text-lg hover:text-primary-light transition-colors">О Федерации</a>
+                <a href="{{ url_for('home') }}#disciplines" class="text-white text-lg hover:text-primary-light transition-colors">Дисциплины</a>
+                <a href="{{ url_for('events_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Мероприятия</a>
+                <a href="{{ url_for('participants_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Рейтинг</a>
+                <a href="{{ url_for('news_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Новости</a>
+                <a href="{{ url_for('home') }}#partners" class="text-white text-lg hover:text-primary-light transition-colors">Партнеры</a>
+                <a href="{{ url_for('contacts') }}" class="text-white text-lg hover:text-primary-light transition-colors">Контакты</a>
+
+                <!-- Используем переменную is_authenticated вместо session -->
+                {% if is_authenticated %}
+                <a href="{{ url_for('admin_dashboard') }}" class="text-white bg-primary-DEFAULT px-4 py-2 rounded text-center">
+                    <i class="fas fa-cog mr-1"></i> Управление сайтом
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Заголовок страницы -->
+    <section class="bg-gradient-to-r from-primary-dark to-primary pt-32 pb-20 text-white">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold mb-4 text-center">Рейтинг участников</h1>
+            <p class="text-xl opacity-80 text-center max-w-2xl mx-auto">Лучшие спортивные программисты Московской области</p>
+        </div>
+    </section>
+
+    <!-- Основное содержимое -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <!-- Табы для категорий -->
+            <div class="flex justify-center mb-12">
+                <div class="inline-flex rounded-md shadow-sm" role="group">
+                    <a href="{{ url_for('participants_list', category='all') }}" class="py-2 px-4 text-sm font-medium {% if current_category == 'all' or current_category is none %}text-white bg-primary-DEFAULT{% else %}text-primary-DEFAULT bg-white{% endif %} rounded-l-lg border border-primary-DEFAULT hover:bg-primary-dark hover:text-white transition-colors">
+                        Общий рейтинг
+                    </a>
+                    <a href="{{ url_for('participants_list', category='open') }}" class="py-2 px-4 text-sm font-medium {% if current_category == 'open' %}text-white bg-primary-DEFAULT{% else %}text-primary-DEFAULT bg-white{% endif %} border-t border-b border-l border-r border-primary-DEFAULT hover:bg-primary-dark hover:text-white transition-colors">
+                        Открытый дивизион
+                    </a>
+                    <a href="{{ url_for('participants_list', category='student') }}" class="py-2 px-4 text-sm font-medium {% if current_category == 'student' %}text-white bg-primary-DEFAULT{% else %}text-primary-DEFAULT bg-white{% endif %} border-t border-b border-l border-r border-primary-DEFAULT hover:bg-primary-dark hover:text-white transition-colors">
+                        Студенты
+                    </a>
+                    <a href="{{ url_for('participants_list', category='school') }}" class="py-2 px-4 text-sm font-medium {% if current_category == 'school' %}text-white bg-primary-DEFAULT{% else %}text-primary-DEFAULT bg-white{% endif %} rounded-r-lg border-t border-b border-r border-primary-DEFAULT hover:bg-primary-dark hover:text-white transition-colors">
+                        Школьники
+                    </a>
+                </div>
+            </div>
+
+            <!-- Таблица рейтинга -->
+            {% if participants %}
+            <div class="overflow-hidden bg-white shadow-lg rounded-lg" data-aos="fade-up">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-primary-DEFAULT text-white">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Ранг</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Участник</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Город</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Организация</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Рейтинг</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Категория</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for participant in participants %}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-lg font-bold">{{ loop.index }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 bg-primary-light rounded-full flex items-center justify-center text-white font-bold">
+                                        {{ participant.name[0].upper() }}
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ participant.name }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ participant.city }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">{{ participant.organization }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-lg font-bold text-primary-dark">{{ participant.rating }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if participant.category == 'open' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                    Открытый
+                                </span>
+                                {% elif participant.category == 'student' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                    Студент
+                                </span>
+                                {% elif participant.category == 'school' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    Школьник
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="bg-white p-8 rounded-lg shadow-lg text-center" data-aos="fade-up">
+                <div class="text-gray-500 text-xl mb-4">В этой категории пока нет участников</div>
+                <a href="{{ url_for('events_list') }}" class="inline-block bg-primary-DEFAULT text-white px-6 py-3 rounded-lg hover:bg-primary-dark transition-colors">
+                    Принять участие в соревнованиях
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="bg-black text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 grid-cols-1 gap-12">
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <div class="text-4xl text-primary-light mr-3"><i class="fas fa-laptop-code"></i></div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">ФСПМО</h3>
+                            <p class="text-gray-400 text-sm">Федерация спортивного программирования МО</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300">Федерация спортивного программирования Московской области развивает и поддерживает талантливых программистов региона.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
+                            <span class="sr-only">Telegram</span>
+                            <i class="fab fa-telegram-plane"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
+                            <span class="sr-only">VK</span>
+                            <i class="fab fa-vk"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
+                            <span class="sr-only">GitHub</span>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-primary-light">Основное</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('home') }}#about" class="text-gray-300 hover:text-white transition-colors">О Федерации</a></li>
+                        <li><a href="{{ url_for('home') }}#disciplines" class="text-gray-300 hover:text-white transition-colors">Дисциплины</a></li>
+                        <li><a href="{{ url_for('events_list') }}" class="text-gray-300 hover:text-white transition-colors">Мероприятия</a></li>
+                        <li><a href="{{ url_for('news_list') }}" class="text-gray-300 hover:text-white transition-colors">Новости</a></li>
+                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Контакты</a></li>
+                    </ul>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-primary-light">Для участников</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('events_list') }}" class="text-gray-300 hover:text-white transition-colors">Регистрация</a></li>
+                        <li><a href="{{ url_for('home') }}#calendar" class="text-gray-300 hover:text-white transition-colors">Календарь</a></li>
+                        <li><a href="{{ url_for('participants_list') }}" class="text-gray-300 hover:text-white transition-colors">Рейтинг</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Учебные материалы</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-primary-light">Сотрудничество</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('home') }}#partners" class="text-gray-300 hover:text-white transition-colors">Стать партнером</a></li>
+                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Спонсорство</a></li>
+                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Организаторам</a></li>
+                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Волонтерам</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
+                <p class="mb-4">© {{ now.year }} Федерация спортивного программирования Московской области. Все права защищены.</p>
+                <div class="flex justify-center space-x-6 mb-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Политика конфиденциальности</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Условия использования</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Правила соревнований</a>
+                </div>
+                <p class="text-sm">Разработано с <i class="fas fa-heart text-primary-light"></i> для развития спортивного программирования</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Инициализация AOS
+        AOS.init({
+            duration: 800,
+            offset: 100,
+            once: true
+        });
+
+        // Мобильное меню
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const closeMenuButton = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.remove('hidden');
+            });
+        }
+
+        if (closeMenuButton) {
+            closeMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        }
+    </script>
+</body>
+</html>

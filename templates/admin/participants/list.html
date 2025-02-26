@@ -1,0 +1,101 @@
+<!-- templates/admin/participants/list.html -->
+{% extends 'admin/base.html' %}
+
+{% block title %}Участники | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Управление участниками{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Список участников</span>
+        <div>
+            <div class="dropdown d-inline-block me-2">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="categoryFilter" data-bs-toggle="dropdown" aria-expanded="false">
+                    Категория
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="categoryFilter">
+                    <li><a class="dropdown-item active" href="#">Все</a></li>
+                    <li><a class="dropdown-item" href="#">Открытый дивизион</a></li>
+                    <li><a class="dropdown-item" href="#">Студенты</a></li>
+                    <li><a class="dropdown-item" href="#">Школьники</a></li>
+                </ul>
+            </div>
+            <a href="{{ url_for('admin_participants_create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Добавить участника
+            </a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if participants %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th width="5%">#</th>
+                        <th width="25%">Имя</th>
+                        <th width="15%">Город</th>
+                        <th width="20%">Организация</th>
+                        <th width="10%">Рейтинг</th>
+                        <th width="10%">Категория</th>
+                        <th width="15%">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for participant in participants %}
+                    <tr>
+                        <td>{{ participant.id }}</td>
+                        <td>{{ participant.name }}</td>
+                        <td>{{ participant.city }}</td>
+                        <td>{{ participant.organization }}</td>
+                        <td>{{ participant.rating }}</td>
+                        <td>
+                            {% if participant.category == 'open' %}
+                            <span class="badge bg-primary">Открытый</span>
+                            {% elif participant.category == 'student' %}
+                            <span class="badge bg-success">Студент</span>
+                            {% elif participant.category == 'school' %}
+                            <span class="badge bg-info">Школьник</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('admin_participants_edit', id=participant.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteParticipantModal{{ participant.id }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+
+                            <!-- Modal for deletion confirmation -->
+                            <div class="modal fade" id="deleteParticipantModal{{ participant.id }}" tabindex="-1" aria-labelledby="deleteParticipantModalLabel{{ participant.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteParticipantModalLabel{{ participant.id }}">Подтверждение удаления</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Вы уверены, что хотите удалить участника "{{ participant.name }}"?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                            <form action="{{ url_for('admin_participants_delete', id=participant.id) }}" method="post">
+                                                <button type="submit" class="btn btn-danger">Удалить</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center my-5">Нет добавленных участников</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

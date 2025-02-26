@@ -1,0 +1,185 @@
+{# templates/admin/events/edit.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Редактирование мероприятия | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Редактирование мероприятия{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Редактирование мероприятия</span>
+        <a href="{{ url_for('admin_events_list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку
+        </a>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('admin_events_edit', id=event.id) }}" method="post" enctype="multipart/form-data">
+            <div class="row mb-3">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Название мероприятия</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ event.title }}" required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Место проведения</label>
+                        <input type="text" class="form-control" id="location" name="location" value="{{ event.location }}" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="start_date" class="form-label">Дата и время начала</label>
+                        <input type="text" class="form-control datepicker" id="start_date" name="start_date" value="{{ event.start_date.strftime('%Y-%m-%d %H:%M') }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="end_date" class="form-label">Дата и время окончания</label>
+                        <input type="text" class="form-control datepicker" id="end_date" name="end_date" value="{{ event.end_date.strftime('%Y-%m-%d %H:%M') }}" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание мероприятия</label>
+                <textarea class="form-control" id="description" name="description" rows="10" required>{{ event.description }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="registration_link" class="form-label">Ссылка на регистрацию</label>
+                <input type="url" class="form-control" id="registration_link" name="registration_link" value="{{ event.registration_link }}">
+                <div class="form-text">Необязательно. Если указана, на странице мероприятия будет отображаться кнопка "Регистрация".</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Изображение</label>
+                <input class="form-control" type="file" id="image" name="image" accept="image/*">
+                <div class="form-text">Рекомендуемый размер: 800x400px. Допустимые форматы: JPG, PNG, GIF.</div>
+                <div id="image_preview" class="mt-2">
+                    {% if event.image %}
+                    <div class="d-flex align-items-center">
+                        <img src="{{ url_for('static', filename=event.image) }}" class="img-thumbnail me-3" style="max-height: 200px;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="delete_image" name="delete_image">
+                            <label class="form-check-label" for="delete_image">Удалить текущее изображение</label>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="published" name="published" {% if event.published %}checked{% endif %}>
+                    <label class="form-check-label" for="published">Опубликовать на сайте</label>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mb-4">
+    <a href="{{ url_for('admin_event_participants', event_id=event.id) }}" class="btn btn-info">
+        <i class="bi bi-people"></i> Управление участниками
+    </a>
+    <div>
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+            <i class="bi bi-trash"></i> Удалить
+        </button>
+        <button type="submit" class="btn btn-primary ms-2">
+            <i class="bi bi-save"></i> Сохранить
+        </button>
+    </div>
+</div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить мероприятие "{{ event.title }}"? Это действие нельзя отменить.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form action="{{ url_for('admin_events_delete', id=event.id) }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ru-RU.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
+<script>
+    $(document).ready(function() {
+        // Инициализация редактора Summernote
+        $('#description').summernote({
+            height: 300,
+            lang: 'ru-RU',
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            callbacks: {
+                onImageUpload: function(files) {
+                    alert('Для загрузки изображений используйте поле "Изображение" ниже редактора.');
+                }
+            }
+        });
+
+        // Инициализация выбора даты и времени
+        flatpickr(".datepicker", {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+            time_24hr: true,
+            locale: "ru",
+            minDate: "today"
+        });
+
+        // Предпросмотр изображения
+        $('#image').change(function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#image_preview').html('<img src="' + e.target.result + '" class="img-thumbnail" style="max-height: 200px;">');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Обработка нажатия на чекбокс "Удалить текущее изображение"
+        $('#delete_image').change(function() {
+            if ($(this).is(':checked')) {
+                $('#image').prop('disabled', true);
+            } else {
+                $('#image').prop('disabled', false);
+            }
+        });
+    });
+</script>
+{% endblock %}

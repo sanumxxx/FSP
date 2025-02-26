@@ -1,0 +1,77 @@
+{# templates/admin/structure/create.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Добавление члена федерации | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Добавление члена федерации{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Добавление члена федерации</span>
+        <a href="{{ url_for('admin_structure_list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку
+        </a>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('admin_structure_create') }}" method="post" enctype="multipart/form-data">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">ФИО</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="position" class="form-label">Должность</label>
+                        <input type="text" class="form-control" id="position" name="position" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание</label>
+                <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+                <div class="form-text">Краткая информация о человеке, его достижения, опыт.</div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="icon" class="form-label">Иконка (FontAwesome)</label>
+                        <input type="text" class="form-control" id="icon" name="icon" placeholder="fas fa-user-tie">
+                        <div class="form-text">Название иконки из Font Awesome. Пример: fas fa-user-tie, fas fa-code, fas fa-chalkboard-teacher</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="order" class="form-label">Порядок отображения</label>
+                        <input type="number" class="form-control" id="order" name="order" value="0">
+                        <div class="form-text">Чем меньше число, тем выше в списке будет отображаться</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="photo" class="form-label">Фотография</label>
+                <input class="form-control" type="file" id="photo" name="photo" accept="image/*">
+                <div class="form-text">Рекомендуемый размер: 300x300px. Допустимые форматы: JPG, PNG.</div>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+                    <label class="form-check-label" for="is_active">Отображать на сайте</label>
+                </div>
+                <div class="form-text">Если отключено, участник не будет отображаться на сайте</div>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{# templates/admin/news/edit.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Редактирование новости | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Редактирование новости{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Редактирование новости</span>
+        <a href="{{ url_for('admin_news_list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку
+        </a>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('admin_news_edit', id=news.id) }}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="title" class="form-label">Заголовок новости</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{ news.title }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="content" class="form-label">Содержание новости</label>
+                <textarea class="form-control" id="content" name="content" rows="12" required>{{ news.content }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="image" class="form-label">Изображение</label>
+                <input class="form-control" type="file" id="image" name="image" accept="image/*">
+                <div class="form-text">Рекомендуемый размер: 800x400px. Допустимые форматы: JPG, PNG, GIF.</div>
+                <div id="image_preview" class="mt-2">
+                    {% if news.image %}
+                    <div class="d-flex align-items-center">
+                        <img src="{{ url_for('static', filename=news.image) }}" class="img-thumbnail me-3" style="max-height: 200px;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="delete_image" name="delete_image">
+                            <label class="form-check-label" for="delete_image">Удалить текущее изображение</label>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="published" name="published" {% if news.published %}checked{% endif %}>
+                    <label class="form-check-label" for="published">Опубликовать на сайте</label>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash"></i> Удалить
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Вы уверены, что хотите удалить новость "{{ news.title }}"? Это действие нельзя отменить.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form action="{{ url_for('admin_news_delete', id=news.id) }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/lang/summernote-ru-RU.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Инициализация редактора Summernote
+        $('#content').summernote({
+            height: 400,
+            lang: 'ru-RU',
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            callbacks: {
+                onImageUpload: function(files) {
+                    alert('Для загрузки изображений используйте поле "Изображение" ниже редактора.');
+                }
+            }
+        });
+
+        // Предпросмотр изображения
+        $('#image').change(function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#image_preview').html('<img src="' + e.target.result + '" class="img-thumbnail" style="max-height: 200px;">');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>
+{% endblock %}

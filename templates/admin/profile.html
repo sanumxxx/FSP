@@ -1,0 +1,56 @@
+<!-- templates/admin/profile.html -->
+{% extends 'admin/base.html' %}
+
+{% block title %}Мой профиль | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Мой профиль{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mx-auto">
+        <div class="card">
+            <div class="card-header">
+                <span>Информация о пользователе</span>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('admin_profile') }}" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Имя пользователя</label>
+                        <input type="text" class="form-control" id="username" value="{{ current_user.username }}" readonly disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Роль</label>
+                        <input type="text" class="form-control" id="role" value="{{ current_user.role }}" readonly disabled>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <h5 class="mb-3">Изменение пароля</h5>
+
+                    <div class="mb-3">
+                        <label for="current_password" class="form-label">Текущий пароль</label>
+                        <input type="password" class="form-control" id="current_password" name="current_password">
+                        <div class="form-text">Оставьте поле пустым, если не хотите менять пароль</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="new_password" class="form-label">Новый пароль</label>
+                        <input type="password" class="form-control" id="new_password" name="new_password">
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Сохранить изменения
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,200 @@
+{# templates/admin/statistics/manage.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Управление статистикой | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Управление статистикой{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Статистика сайта</span>
+        <div>
+            <form action="{{ url_for('admin_statistics_sync') }}" method="post" class="d-inline-block">
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-repeat"></i> Синхронизировать с данными
+                </button>
+            </form>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStatModal">
+                <i class="bi bi-plus-lg"></i> Добавить статистику
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Статистика отображается на главной странице сайта. Некоторые показатели можно синхронизировать автоматически с данными из базы.
+            <ul class="mt-2 mb-0">
+                <li>Участники: {{ participants_count }}</li>
+                <li>Соревнования в этом году: {{ events_count }}</li>
+                <li>Города участников: {{ cities_count }}</li>
+            </ul>
+        </div>
+
+        <form action="{{ url_for('admin_statistics_update') }}" method="post">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th width="15%">Ключ</th>
+                            <th width="15%">Значение</th>
+                            <th width="20%">Отображение</th>
+                            <th width="15%">Заголовок</th>
+                            <th width="15%">Подзаголовок</th>
+                            <th width="10%">Последнее обновление</th>
+                            <th width="10%">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in statistics %}
+                        <tr>
+                            <td>{{ stat.key }}</td>
+                            <td>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="stat_{{ stat.key }}" name="stat_{{ stat.key }}" value="{{ stat.value }}">
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary rounded p-3 text-white fw-bold text-center me-2" style="min-width: 70px;">
+                                        {{ stat.value }}{% if stat.is_counter %}+{% endif %}
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="counter_{{ stat.key }}" name="counter_{{ stat.key }}" {% if stat.is_counter %}checked{% endif %}>
+                                        <label class="form-check-label" for="counter_{{ stat.key }}">Показывать "+"</label>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="title_{{ stat.key }}" name="title_{{ stat.key }}" value="{{ stat.title }}">
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="subtitle_{{ stat.key }}" name="subtitle_{{ stat.key }}" value="{{ stat.subtitle }}">
+                            </td>
+                            <td>{{ stat.last_updated.strftime('%d.%m.%Y %H:%M') }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteStatModal{{ stat.key }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Модальное окно удаления -->
+                        <div class="modal fade" id="deleteStatModal{{ stat.key }}" tabindex="-1" aria-labelledby="deleteStatModalLabel{{ stat.key }}" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="deleteStatModalLabel{{ stat.key }}">Подтверждение удаления</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Вы уверены, что хотите удалить статистику "{{ stat.title }}"?</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                        <form action="{{ url_for('admin_statistics_delete', key=stat.key) }}" method="post">
+                                            <button type="submit" class="btn btn-danger">Удалить</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4">
+                                <p class="mb-0">Нет добавленных статистик</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно добавления статистики -->
+<div class="modal fade" id="addStatModal" tabindex="-1" aria-labelledby="addStatModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addStatModalLabel">Добавить новую статистику</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('admin_statistics_create') }}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="key" class="form-label">Ключ (латиница, без пробелов)</label>
+                        <input type="text" class="form-control" id="key" name="key" required>
+                        <div class="form-text">Например: participants, competitions, awards</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="value" class="form-label">Значение</label>
+                        <input type="number" class="form-control" id="value" name="value" value="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Заголовок</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                        <div class="form-text">Текст над числом. Например: "Участников"</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="subtitle" class="form-label">Подзаголовок</label>
+                        <input type="text" class="form-control" id="subtitle" name="subtitle" required>
+                        <div class="form-text">Текст под числом. Например: "в год"</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_counter" name="is_counter">
+                        <label class="form-check-label" for="is_counter">Показывать "+" после числа</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Изменение формата отображения при изменении checkbox
+        const counterCheckboxes = document.querySelectorAll('input[type="checkbox"][id^="counter_"]');
+        counterCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const key = this.id.replace('counter_', '');
+                const valueElement = this.closest('tr').querySelector('td:nth-child(3) div.bg-primary');
+                const valueInput = document.getElementById('stat_' + key);
+
+                if (this.checked) {
+                    valueElement.textContent = valueInput.value + '+';
+                } else {
+                    valueElement.textContent = valueInput.value;
+                }
+            });
+        });
+
+        // Обновление превью при изменении значения
+        const valueInputs = document.querySelectorAll('input[type="number"][id^="stat_"]');
+        valueInputs.forEach(input => {
+            input.addEventListener('input', function() {
+                const key = this.id.replace('stat_', '');
+                const valueElement = this.closest('tr').querySelector('td:nth-child(3) div.bg-primary');
+                const counterCheckbox = document.getElementById('counter_' + key);
+
+                if (counterCheckbox.checked) {
+                    valueElement.textContent = this.value + '+';
+                } else {
+                    valueElement.textContent = this.value;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

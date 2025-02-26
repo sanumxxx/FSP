@@ -1,0 +1,130 @@
+{# templates/admin/participants/edit.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Редактирование участника | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Редактирование участника{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Редактирование участника: {{ participant.name }}</span>
+        <a href="{{ url_for('admin_participants_list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку
+        </a>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('admin_participants_edit', id=participant.id) }}" method="post">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">ФИО</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ participant.name }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="city" class="form-label">Город</label>
+                        <input type="text" class="form-control" id="city" name="city" value="{{ participant.city }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="organization" class="form-label">Организация</label>
+                        <input type="text" class="form-control" id="organization" name="organization" value="{{ participant.organization }}">
+                        <div class="form-text">Название учебного заведения или компании</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Категория</label>
+                        <select class="form-select" id="category" name="category">
+                            <option value="open" {% if participant.category == 'open' %}selected{% endif %}>Открытый дивизион</option>
+                            <option value="student" {% if participant.category == 'student' %}selected{% endif %}>Студент</option>
+                            <option value="school" {% if participant.category == 'school' %}selected{% endif %}>Школьник</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="rating" class="form-label">Рейтинг</label>
+                        <input type="number" class="form-control" id="rating" name="rating" value="{{ participant.rating }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="achievements" class="form-label">Достижения</label>
+                <textarea class="form-control" id="achievements" name="achievements" rows="4">{{ participant.achievements }}</textarea>
+                <div class="form-text">Перечислите основные достижения участника в соревнованиях по программированию</div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteParticipantModal">
+                    <i class="bi bi-trash"></i> Удалить участника
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить изменения
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteParticipantModal" tabindex="-1" aria-labelledby="deleteParticipantModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteParticipantModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить участника "{{ participant.name }}"?</p>
+                <p class="text-danger"><strong>Внимание:</strong> Это действие нельзя будет отменить.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form action="{{ url_for('admin_participants_delete', id=participant.id) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Скрипт для валидации формы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Валидация рейтинга
+        const ratingInput = document.getElementById('rating');
+
+        ratingInput.addEventListener('change', function() {
+            if (parseInt(this.value) < 0) {
+                this.value = 0;
+                alert('Рейтинг не может быть отрицательным');
+            }
+        });
+
+        // Подтверждение сохранения крупных изменений рейтинга
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const originalRating = {{ participant.rating }};
+            const newRating = parseInt(ratingInput.value);
+
+            if (Math.abs(newRating - originalRating) > 500) {
+                if (!confirm('Вы собираетесь изменить рейтинг более чем на 500 пунктов. Вы уверены?')) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

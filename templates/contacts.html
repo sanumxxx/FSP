@@ -1,0 +1,323 @@
+{# templates/contacts.html #}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Контакты - Федерация спортивного программирования МО</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#a78bfa', // Lighter Purple
+                            DEFAULT: '#8b5cf6', // Tailwind Indigo-500 (Purple)
+                            dark: '#6b46c1'      // Darker Purple
+                        }
+                    },
+                    fontFamily: {
+                        'code': ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+
+        .nav-link:hover {
+            color: #a78bfa;
+        }
+    </style>
+</head>
+<body>
+    <!-- Навигация -->
+    <header class="fixed w-full bg-black z-40 backdrop-blur-sm bg-opacity-90">
+        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{{ url_for('home') }}" class="text-white text-xl font-bold hover:scale-105 transition-transform flex items-center">
+                <span class="mr-2 text-primary-light"><i class="fas fa-laptop-code"></i></span>
+                ФСПМО
+            </a>
+            <div class="hidden lg:flex space-x-8">
+                <a href="{{ url_for('home') }}#about" class="text-white nav-link transition-colors">О Федерации</a>
+                <a href="{{ url_for('home') }}#disciplines" class="text-white nav-link transition-colors">Дисциплины</a>
+                <a href="{{ url_for('events_list') }}" class="text-white nav-link transition-colors">Мероприятия</a>
+                <a href="{{ url_for('participants_list') }}" class="text-white nav-link transition-colors">Рейтинг</a>
+                <a href="{{ url_for('news_list') }}" class="text-white nav-link transition-colors">Новости</a>
+                <a href="{{ url_for('home') }}#partners" class="text-white nav-link transition-colors">Партнеры</a>
+                <a href="{{ url_for('contacts') }}" class="text-white nav-link transition-colors">Контакты</a>
+
+                <!-- Используем переменную is_authenticated вместо session -->
+                {% if is_authenticated %}
+                <a href="{{ url_for('admin_dashboard') }}" class="flex items-center text-white px-3 py-1.5 bg-primary-DEFAULT rounded hover:bg-primary-dark transition-colors">
+                    <i class="fas fa-cog mr-1"></i>
+                    <span>Управление</span>
+                </a>
+                {% endif %}
+            </div>
+            <button id="mobile-menu-button" class="text-white text-2xl lg:hidden">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Мобильное меню -->
+    <div id="mobile-menu" class="fixed w-full h-screen bg-black z-50 hidden lg:hidden">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex justify-between items-center mb-8">
+                <a href="{{ url_for('home') }}" class="text-white text-xl font-bold">ФСПМО</a>
+                <button id="close-menu" class="text-white text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="flex flex-col space-y-6">
+                <a href="{{ url_for('home') }}#about" class="text-white text-lg hover:text-primary-light transition-colors">О Федерации</a>
+                <a href="{{ url_for('home') }}#disciplines" class="text-white text-lg hover:text-primary-light transition-colors">Дисциплины</a>
+                <a href="{{ url_for('events_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Мероприятия</a>
+                <a href="{{ url_for('participants_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Рейтинг</a>
+                <a href="{{ url_for('news_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Новости</a>
+                <a href="{{ url_for('home') }}#partners" class="text-white text-lg hover:text-primary-light transition-colors">Партнеры</a>
+                <a href="{{ url_for('contacts') }}" class="text-white text-lg hover:text-primary-light transition-colors">Контакты</a>
+
+                <!-- Используем переменную is_authenticated вместо session -->
+                {% if is_authenticated %}
+                <a href="{{ url_for('admin_dashboard') }}" class="text-white bg-primary-DEFAULT px-4 py-2 rounded text-center">
+                    <i class="fas fa-cog mr-1"></i> Управление сайтом
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Заголовок страницы -->
+    <section class="bg-gradient-to-r from-primary-dark to-primary pt-32 pb-20 text-white">
+        <div class="container mx-auto px-4">
+            <h1 class="text-4xl font-bold mb-4 text-center">Контакты</h1>
+            <p class="text-xl opacity-80 text-center max-w-2xl mx-auto">Свяжитесь с нами для получения дополнительной информации</p>
+        </div>
+    </section>
+
+    <!-- Основное содержимое -->
+    <section class="py-16">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Контактная информация -->
+                <div class="space-y-8" data-aos="fade-right">
+                    <div class="bg-white rounded-lg shadow-lg p-8 space-y-6">
+                        <h2 class="text-2xl font-bold text-black mb-6">Контактная информация</h2>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-primary-DEFAULT bg-opacity-10 flex items-center justify-center">
+                                <div class="text-2xl text-primary-DEFAULT"><i class="fas fa-map-marker-alt"></i></div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-black mb-1">Адрес</h3>
+                                <p class="text-gray-700">г. Красногорск, ул. Центральная, д. 10, офис 305</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-primary-DEFAULT bg-opacity-10 flex items-center justify-center">
+                                <div class="text-2xl text-primary-DEFAULT"><i class="fas fa-phone"></i></div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-black mb-1">Телефон</h3>
+                                <p class="text-gray-700">+7 (495) 123-45-67</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-primary-DEFAULT bg-opacity-10 flex items-center justify-center">
+                                <div class="text-2xl text-primary-DEFAULT"><i class="fas fa-envelope"></i></div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-black mb-1">Email</h3>
+                                <p class="text-gray-700">info@fspmo.ru</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-primary-DEFAULT bg-opacity-10 flex items-center justify-center">
+                                <div class="text-2xl text-primary-DEFAULT"><i class="fas fa-clock"></i></div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-black mb-1">Режим работы</h3>
+                                <p class="text-gray-700">Понедельник-пятница: 10:00 - 18:00</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-lg p-8">
+                        <h2 class="text-2xl font-bold text-black mb-6">Социальные сети</h2>
+                        <div class="flex space-x-4">
+                            <a href="#" class="w-12 h-12 rounded-full bg-primary-DEFAULT flex items-center justify-center text-white hover:bg-primary-dark transition-colors">
+                                <i class="fab fa-telegram-plane"></i>
+                            </a>
+                            <a href="#" class="w-12 h-12 rounded-full bg-primary-DEFAULT flex items-center justify-center text-white hover:bg-primary-dark transition-colors">
+                                <i class="fab fa-vk"></i>
+                            </a>
+                            <a href="#" class="w-12 h-12 rounded-full bg-primary-DEFAULT flex items-center justify-center text-white hover:bg-primary-dark transition-colors">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="#" class="w-12 h-12 rounded-full bg-primary-DEFAULT flex items-center justify-center text-white hover:bg-primary-dark transition-colors">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Форма обратной связи -->
+                <div data-aos="fade-left">
+                    <div class="bg-white rounded-lg shadow-lg p-8">
+                        <h2 class="text-2xl font-bold text-black mb-6">Обратная связь</h2>
+                        <form>
+                            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                <div>
+                                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Имя</label>
+                                    <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-DEFAULT" required>
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                    <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-DEFAULT" required>
+                                </div>
+                            </div>
+                            <div class="mb-6">
+                                <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Тема</label>
+                                <input type="text" id="subject" name="subject" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-DEFAULT" required>
+                            </div>
+                            <div class="mb-6">
+                                <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Сообщение</label>
+                                <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-DEFAULT" required></textarea>
+                            </div>
+                            <div class="flex items-center mb-6">
+                                <input type="checkbox" id="privacy" name="privacy" class="mr-2 h-4 w-4 text-primary-DEFAULT focus:ring-primary-DEFAULT" required>
+                                <label for="privacy" class="text-sm text-gray-700">Я согласен с <a href="#" class="text-primary-DEFAULT hover:underline">политикой конфиденциальности</a></label>
+                            </div>
+                            <button type="submit" class="w-full bg-primary-DEFAULT text-white py-3 px-6 rounded-lg font-bold hover:bg-primary-dark transition-colors">
+                                Отправить сообщение
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карта -->
+            <div class="mt-16" data-aos="fade-up">
+                <h2 class="text-2xl font-bold text-black mb-6 text-center">Наше местоположение</h2>
+                <div class="bg-white rounded-lg shadow-lg p-4">
+                    <div class="h-96 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <p class="text-gray-500">Здесь будет карта с расположением офиса федерации</p>
+                        <!-- В реальном проекте здесь будет iframe с Яндекс.Картами или Google Maps -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer class="bg-black text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-4 grid-cols-1 gap-12">
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <div class="text-4xl text-primary-light mr-3"><i class="fas fa-laptop-code"></i></div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">ФСПМО</h3>
+                            <p class="text-gray-400 text-sm">Федерация спортивного программирования МО</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-300">Федерация спортивного программирования Московской области развивает и поддерживает талантливых программистов региона.</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
+                            <span class="sr-only">Telegram</span>
+                            <i class="fab fa-telegram-plane"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
+                            <span class="sr-only">VK</span>
+                            <i class="fab fa-vk"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
+                            <span class="sr-only">GitHub</span>
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-primary-light">Основное</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('home') }}#about" class="text-gray-300 hover:text-white transition-colors">О Федерации</a></li>
+                        <li><a href="{{ url_for('home') }}#disciplines" class="text-gray-300 hover:text-white transition-colors">Дисциплины</a></li>
+                        <li><a href="{{ url_for('events_list') }}" class="text-gray-300 hover:text-white transition-colors">Мероприятия</a></li>
+                        <li><a href="{{ url_for('news_list') }}" class="text-gray-300 hover:text-white transition-colors">Новости</a></li>
+                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Контакты</a></li>
+                    </ul>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-primary-light">Для участников</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('events_list') }}" class="text-gray-300 hover:text-white transition-colors">Регистрация</a></li>
+                        <li><a href="{{ url_for('home') }}#calendar" class="text-gray-300 hover:text-white transition-colors">Календарь</a></li>
+                        <li><a href="{{ url_for('participants_list') }}" class="text-gray-300 hover:text-white transition-colors">Рейтинг</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Учебные материалы</a></li>
+                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="space-y-4">
+                    <h3 class="text-xl font-bold text-primary-light">Сотрудничество</h3>
+                    <ul class="space-y-2">
+                        <li><a href="{{ url_for('home') }}#partners" class="text-gray-300 hover:text-white transition-colors">Стать партнером</a></li>
+                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Спонсорство</a></li>
+                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Организаторам</a></li>
+                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Волонтерам</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
+                <p class="mb-4">© {{ now.year }} Федерация спортивного программирования Московской области. Все права защищены.</p>
+                <div class="flex justify-center space-x-6 mb-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Политика конфиденциальности</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Условия использования</a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Правила соревнований</a>
+                </div>
+                <p class="text-sm">Разработано с <i class="fas fa-heart text-primary-light"></i> для развития спортивного программирования</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Инициализация AOS
+        AOS.init({
+            duration: 800,
+            offset: 100,
+            once: true
+        });
+
+        // Мобильное меню
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const closeMenuButton = document.getElementById('close-menu');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.remove('hidden');
+            });
+        }
+
+        if (closeMenuButton) {
+            closeMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+            });
+        }
+    </script>
+</body>
+</html>

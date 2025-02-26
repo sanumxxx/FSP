@@ -1,0 +1,110 @@
+{# templates/admin/gallery/edit.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Редактирование изображения | Админ-панель ФСПМО{% endblock %}
+{% block page_title %}Редактирование изображения{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Редактирование изображения</span>
+        <a href="{{ url_for('admin_gallery_list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку
+        </a>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('admin_gallery_edit', id=gallery_item.id) }}" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Название изображения</label>
+                        <input type="text" class="form-control" id="title" name="title" value="{{ gallery_item.title }}">
+                        <div class="form-text">Необязательно. Используется для отображения подписей в галерее.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="event_id" class="form-label">Связанное мероприятие</label>
+                        <select class="form-select" id="event_id" name="event_id">
+                            <option value="">-- Не выбрано --</option>
+                            {% for event in events %}
+                            <option value="{{ event.id }}" {% if gallery_item.event_id == event.id %}selected{% endif %}>
+                                {{ event.title }} ({{ event.start_date.strftime('%d.%m.%Y') }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Необязательно. Выберите мероприятие, к которому относится это изображение.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Заменить изображение</label>
+                        <input class="form-control" type="file" id="image" name="image" accept="image/*">
+                        <div class="form-text">Оставьте пустым, чтобы сохранить текущее изображение. Допустимые форматы: JPG, PNG, GIF.</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Текущее изображение</label>
+                        <div class="text-center p-3 bg-light rounded">
+                            <img src="{{ url_for('static', filename=gallery_item.image) }}" class="img-fluid rounded" alt="{{ gallery_item.title or 'Изображение галереи' }}">
+                        </div>
+                        <div class="form-text text-center">Загружено: {{ gallery_item.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    <i class="bi bi-trash"></i> Удалить
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Сохранить
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить это изображение из галереи? Это действие нельзя отменить.</p>
+                <div class="text-center">
+                    <img src="{{ url_for('static', filename=gallery_item.image) }}" class="img-thumbnail" style="max-height: 200px;" alt="{{ gallery_item.title or 'Изображение галереи' }}">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form action="{{ url_for('admin_gallery_delete', id=gallery_item.id) }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Предпросмотр изображения при выборе нового файла
+        const imageInput = document.getElementById('image');
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imagePreview = document.querySelector('.col-md-6 .img-fluid');
+                    imagePreview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    });
+</script>
+{% endblock %}
