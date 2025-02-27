@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мероприятия - Федерация спортивного программирования МО</title>
+    <title>Мероприятия - Федерация спортивного программирования ЗО</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -50,7 +50,7 @@
         <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
             <a href="{{ url_for('home') }}" class="text-white text-xl font-bold hover:scale-105 transition-transform flex items-center">
                 <span class="mr-2 text-primary-light"><i class="fas fa-laptop-code"></i></span>
-                ФСПМО
+                ФСПЗО
             </a>
             <div class="hidden lg:flex space-x-8">
                 <a href="{{ url_for('home') }}#about" class="text-white nav-link transition-colors">О Федерации</a>
@@ -67,11 +67,11 @@
         </nav>
     </header>
 
-    <!-- Мобильное меню -->
+    <!-- ЗОбильное меню -->
     <div id="mobile-menu" class="fixed w-full h-screen bg-black z-50 hidden lg:hidden">
         <div class="container mx-auto px-4 py-8">
             <div class="flex justify-between items-center mb-8">
-                <a href="{{ url_for('home') }}" class="text-white text-xl font-bold">ФСПМО</a>
+                <a href="{{ url_for('home') }}" class="text-white text-xl font-bold">ФСПЗО</a>
                 <button id="close-menu" class="text-white text-2xl">
                     <i class="fas fa-times"></i>
                 </button>
@@ -96,7 +96,7 @@
         </div>
     </section>
 
-    <!-- Основное содержимое -->
+    <!-- Основное содержиЗОе -->
     <section class="py-16">
         <div class="container mx-auto px-4">
             <!-- Табы -->
@@ -226,11 +226,11 @@
                     <div class="flex items-center">
                         <div class="text-4xl text-primary-light mr-3"><i class="fas fa-laptop-code"></i></div>
                         <div>
-                            <h3 class="text-xl font-bold text-white">ФСПМО</h3>
-                            <p class="text-gray-400 text-sm">Федерация спортивного программирования МО</p>
+                            <h3 class="text-xl font-bold text-white">ФСПЗО</h3>
+                            <p class="text-gray-400 text-sm">Федерация спортивного программирования ЗО</p>
                         </div>
                     </div>
-                    <p class="text-gray-300">Федерация спортивного программирования Московской области развивает и поддерживает талантливых программистов региона.</p>
+                    <p class="text-gray-300">Федерация спортивного программирования Запорожской области развивает и поддерживает талантливых программистов региона.</p>
                     <div class="flex space-x-4">
                         <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
                             <span class="sr-only">Telegram</span>
@@ -277,7 +277,7 @@
                 </div>
             </div>
             <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-                <p class="mb-4">© {{ now.year }} Федерация спортивного программирования Московской области. Все права защищены.</p>
+                <p class="mb-4">© {{ now.year }} Федерация спортивного программирования Запорожской области. Все права защищены.</p>
                 <div class="flex justify-center space-x-6 mb-4">
                     <a href="#" class="text-gray-400 hover:text-white transition-colors">Политика конфиденциальности</a>
                     <a href="#" class="text-gray-400 hover:text-white transition-colors">Условия использования</a>
@@ -297,7 +297,7 @@
             once: true
         });
 
-        // Мобильное меню
+        // ЗОбильное меню
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const closeMenuButton = document.getElementById('close-menu');
         const mobileMenu = document.getElementById('mobile-menu');

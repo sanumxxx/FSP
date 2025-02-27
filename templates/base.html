@@ -1,0 +1,180 @@
+{# templates/base.html #}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Федерация спортивного программирования ЗО{% endblock %}</title>
+
+    <!-- Общие стили и скрипты -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Конфигурация Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            light: '#a78bfa', // Lighter Purple
+                            DEFAULT: '#8b5cf6', // Tailwind Indigo-500 (Purple)
+                            dark: '#6b46c1'      // Darker Purple
+                        },
+                        'team-card-bg': '#f9f5ff', // Very Light Purple for Team Cards
+                        'team-card-border': '#e9d8fd', // Light Purple Border
+                        'code-bg': '#1e1e3f',     // Dark Purple Code Background
+                        'terminal-green': '#3FD2AF' // Terminal Green Color
+                    },
+                    fontFamily: {
+                        'code': ['"JetBrains Mono"', 'monospace']
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'typing': 'typing 3.5s steps(30, end), blink-caret .75s step-end infinite'
+                    },
+                    keyframes: {
+                        typing: {
+                            'from': { width: '0' },
+                            'to': { width: '100%' }
+                        },
+                        'blink-caret': {
+                            'from, to': { borderColor: 'transparent' },
+                            '50%': { borderColor: '#a78bfa' }
+                        }
+                    },
+                    backgroundImage: {
+                        'code-pattern': "url('{{ url_for('static', filename='img/code-bg.jpg') }}')",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Общие стили -->
+    <style>
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #f3f4f6; /* Very Light Gray Background, almost white */
+            color: #111827; /* Dark Gray Text, almost black */
+            scroll-behavior: smooth;
+        }
+        .team-card {
+            background-color: theme('colors.team-card-bg');
+            border: 1px solid theme('colors.team-card-border');
+        }
+        .team-card:hover {
+            transform: scale(1.05);
+            transition: transform 0.2s ease-in-out;
+        }
+        .nav-link:hover {
+            color: theme('colors.primary.light'); /* Light Purple Hover */
+        }
+
+        /* Code animation styles */
+        .code-animation {
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0 auto;
+            letter-spacing: 0.15em;
+            border-right: 2px solid theme('colors.primary.light');
+            animation: typing 3.5s steps(30, end), blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: theme('colors.primary.light') }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.primary.DEFAULT');
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: theme('colors.primary.dark');
+        }
+
+        /* Стили для пульсирующей кнопки регистрации */
+        .register-btn-pulse {
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+
+        /* Стили для фильтр-кнопок */
+        .filter-btn:hover {
+            color: white !important;
+            background-color: #5b21b6 !important; /* purple-800 */
+        }
+
+        .filter-btn.active {
+            color: white !important;
+            background-color: #8b5cf6 !important; /* purple-500 */
+        }
+
+        .filter-btn:not(.active) {
+            color: #8b5cf6 !important;
+            background-color: white !important;
+        }
+    </style>
+
+    <!-- Дополнительные стили для конкретных страниц -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Подключаем шапку -->
+    {% include 'includes/header.html' %}
+
+    <!-- Основное содержимое -->
+    {% block content %}{% endblock %}
+
+    <!-- Подключаем футер -->
+    {% include 'includes/footer.html' %}
+
+    <!-- Общие скрипты -->
+    <script>
+        // Инициализация AOS
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                offset: 100,
+                once: true
+            });
+        });
+    </script>
+
+    <!-- Дополнительные скрипты для конкретных страниц -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

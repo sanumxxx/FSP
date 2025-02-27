@@ -1,10 +1,11 @@
 <!-- templates/admin/dashboard.html -->
 {% extends 'admin/base.html' %}
 
-{% block title %}Панель управления | Админ-панель ФСПМО{% endblock %}
+{% block title %}Панель управления | Админ-панель ФСПЗО{% endblock %}
 {% block page_title %}Панель управления{% endblock %}
 
 {% block content %}
+<!-- Блок с суммарной статистикой -->
 <div class="row">
     <div class="col-md-3">
         <div class="card dashboard-card mb-4">
@@ -64,7 +65,9 @@
 </div>
 
 <div class="row">
+    <!-- Левая колонка -->
     <div class="col-md-6">
+        <!-- Предстоящие мероприятия -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Предстоящие мероприятия</span>
@@ -89,7 +92,10 @@
                                 <td>{{ event.start_date.strftime('%d.%m.%Y %H:%M') }}</td>
                                 <td>{{ event.location }}</td>
                                 <td>
-                                    <a href="{{ url_for('admin_events_edit', id=event.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('admin_events_edit', id=event.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                                        <a href="{{ url_for('admin_event_participants', event_id=event.id) }}" class="btn btn-sm btn-outline-info" title="Участники"><i class="bi bi-people"></i></a>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -102,17 +108,88 @@
             </div>
         </div>
 
-        <div class="card">
+        <!-- Статистика по дисциплинам -->
+        <div class="card mb-4">
             <div class="card-header">
-                <span>Статистика посещений</span>
+                <span>Мероприятия по дисциплинам</span>
             </div>
             <div class="card-body">
-                <canvas id="visitsChart" height="250"></canvas>
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <div class="display-4 text-primary-emphasis">
+                                {{ algorithms_events_count if algorithms_events_count is defined else 0 }}
+                            </div>
+                            <div class="text-muted">Алгоритмическое</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <div class="display-4 text-primary-emphasis">
+                                {{ product_events_count if product_events_count is defined else 0 }}
+                            </div>
+                            <div class="text-muted">Продуктовое</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <div class="display-4 text-primary-emphasis">
+                                {{ robotics_events_count if robotics_events_count is defined else 0 }}
+                            </div>
+                            <div class="text-muted">Робототехника</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="{{ url_for('admin_events_list') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-plus-circle"></i> Добавить мероприятие
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Календарь ближайшего месяца -->
+        <div class="card">
+            <div class="card-header">
+                <span>Календарь на {{ now.strftime('%B %Y') }}</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered m-0">
+                        <thead>
+                            <tr>
+                                <th>Пн</th>
+                                <th>Вт</th>
+                                <th>Ср</th>
+                                <th>Чт</th>
+                                <th>Пт</th>
+                                <th>Сб</th>
+                                <th>Вс</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for week in calendar_data %}
+                            <tr>
+                                {% for day in week %}
+                                <td class="p-2 text-center {% if day.today %}bg-light{% endif %} {% if day.has_event %}text-primary fw-bold{% endif %}">
+                                    {% if day.day > 0 %}
+                                        {{ day.day }}
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Правая колонка -->
     <div class="col-md-6">
+        <!-- Новости -->
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span>Последние новости</span>
@@ -156,12 +233,84 @@
             </div>
         </div>
 
-        <div class="card">
+        <!-- Быстрые действия -->
+        <div class="card mb-4">
             <div class="card-header">
-                <span>Активность участников</span>
+                <span>Быстрые действия</span>
             </div>
             <div class="card-body">
-                <canvas id="participantsChart" height="250"></canvas>
+                <div class="row text-center">
+                    <div class="col-6 col-md-4 mb-3">
+                        <a href="{{ url_for('admin_news_create') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                            <i class="bi bi-plus-circle fs-2 d-block mb-2 text-primary"></i>
+                            <span>Добавить новость</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 mb-3">
+                        <a href="{{ url_for('admin_events_create') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                            <i class="bi bi-calendar-plus fs-2 d-block mb-2 text-primary"></i>
+                            <span>Создать мероприятие</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 mb-3">
+                        <a href="{{ url_for('admin_participants_list') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                            <i class="bi bi-person-plus fs-2 d-block mb-2 text-primary"></i>
+                            <span>Участники</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 mb-3">
+                        <a href="{{ url_for('admin_gallery_list') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                            <i class="bi bi-images fs-2 d-block mb-2 text-primary"></i>
+                            <span>Галерея</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 mb-3">
+                        <a href="{{ url_for('admin_statistics') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                            <i class="bi bi-bar-chart fs-2 d-block mb-2 text-primary"></i>
+                            <span>Статистика</span>
+                        </a>
+                    </div>
+                    <div class="col-6 col-md-4 mb-3">
+                        <a href="{{ url_for('admin_partners_list') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                            <i class="bi bi-building fs-2 d-block mb-2 text-primary"></i>
+                            <span>Партнеры</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Последние галерейные изображения -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Недавно добавленные изображения</span>
+                <a href="{{ url_for('admin_gallery_list') }}" class="btn btn-sm btn-outline-primary">Все изображения</a>
+            </div>
+            <div class="card-body">
+                {% if recent_gallery_images %}
+                <div class="row">
+                    {% for image in recent_gallery_images %}
+                    <div class="col-md-4 col-sm-6 mb-3">
+                        <div class="card h-100">
+                            <img src="{{ url_for('static', filename=image.image) }}" class="card-img-top" alt="{{ image.title or 'Изображение галереи' }}" style="height: 120px; object-fit: cover;">
+                            <div class="card-body p-2">
+                                <p class="card-text small text-truncate">{{ image.title or "Без названия" }}</p>
+                                <a href="{{ url_for('admin_gallery_edit', id=image.id) }}" class="btn btn-sm btn-outline-primary w-100">
+                                    <i class="bi bi-pencil"></i> Изменить
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-center text-muted my-4">Нет изображений в галерее</p>
+                <div class="text-center">
+                    <a href="{{ url_for('admin_gallery_create') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-plus-circle"></i> Добавить изображение
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -170,65 +319,6 @@
 
 {% block extra_js %}
 <script>
-    // График посещений
-    var visitsCtx = document.getElementById('visitsChart').getContext('2d');
-    var visitsChart = new Chart(visitsCtx, {
-        type: 'line',
-        data: {
-            labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл'],
-            datasets: [{
-                label: 'Посещения сайта',
-                data: [1500, 1800, 2200, 1900, 2400, 2800, 3100],
-                borderColor: '#8b5cf6',
-                tension: 0.1,
-                fill: true,
-                backgroundColor: 'rgba(139, 92, 246, 0.1)'
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-
-    // График активности участников
-    var participantsCtx = document.getElementById('participantsChart').getContext('2d');
-    var participantsChart = new Chart(participantsCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Общий', 'Студенты', 'Школьники'],
-            datasets: [{
-                label: 'Количество участников',
-                data: [150, 80, 70],
-                backgroundColor: [
-                    '#6b46c1',
-                    '#8b5cf6',
-                    '#a78bfa'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+    // При необходимости добавьте JavaScript для обработки календаря или других интерактивных элементов
 </script>
 {% endblock %}

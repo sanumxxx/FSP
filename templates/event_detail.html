@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ event.title }} | Федерация спортивного программирования МО</title>
+    <title>{{ event.title }} | Федерация спортивного программирования ЗО</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
@@ -124,7 +124,7 @@
     <div id="mobile-menu" class="fixed w-full h-screen bg-black z-50 hidden lg:hidden">
         <div class="container mx-auto px-4 py-8">
             <div class="flex justify-between items-center mb-8">
-                <a href="{{ url_for('home') }}" class="text-white text-xl font-bold">ФСПМО</a>
+                <a href="{{ url_for('home') }}" class="text-white text-xl font-bold">ФСПЗО</a>
                 <button id="close-menu" class="text-white text-2xl">
                     <i class="fas fa-times"></i>
                 </button>
@@ -159,7 +159,7 @@
         <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
             <a href="{{ url_for('home') }}" class="text-white text-xl font-bold hover:scale-105 transition-transform flex items-center">
                 <span class="mr-2 text-primary-light"><i class="fas fa-laptop-code"></i></span>
-                ФСПМО
+                ФСПЗО
             </a>
             <div class="hidden lg:flex space-x-8">
                 <a href="{{ url_for('home') }}#about" class="text-white nav-link transition-colors">О Федерации</a>
@@ -232,13 +232,14 @@
 
         <!-- Кнопка регистрации -->
         {% if event.registration_link %}
-        <div class="text-center mt-8">
-            <a href="{{ event.registration_link }}" target="_blank" class="bg-blackpar text-primary-DEFAULT hover:bg-gray-100 px-8 py-3 rounded-lg font-bold transition-colors inline-flex items-center">
-                <i class="fas fa-user-plus mr-2"></i>
-                Зарегистрироваться
-            </a>
-        </div>
-        {% endif %}
+<div class="text-center mt-8">
+    <a href="{{ event.registration_link }}" target="_blank"
+       class="register-btn-pulse inline-flex items-center px-8 py-3 rounded-lg font-bold bg-white text-primary-dark border border-white hover:bg-gray-100 transform transition">
+        <i class="fas fa-user-plus mr-2"></i>
+        Зарегистрироваться
+    </a>
+</div>
+{% endif %}
     </div>
 </section>
 
@@ -289,7 +290,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-bold text-gray-700">Организатор</h3>
-                                    <p>Федерация спортивного программирования МО</p>
+                                    <p>Федерация спортивного программирования ЗО</p>
                                 </div>
                             </div>
                         </div>
@@ -454,9 +455,9 @@
         <!-- Фильтры -->
         <div class="flex justify-center mb-6">
             <div class="inline-flex rounded-md shadow-sm" role="group">
-                <button id="filter-all" class="py-2 px-4 text-sm font-medium text-white bg-primary-DEFAULT rounded-l-lg border border-primary-DEFAULT hover:bg-primary-dark transition-colors filter-btn active">
-                    Все участники
-                </button>
+                <button id="filter-all" class="py-2 px-4 text-sm font-medium text-gray-800 bg-white rounded-l-lg border border-primary-DEFAULT hover:bg-gray-100 transition-colors filter-btn active">
+    Все участники
+</button>
                 <button id="filter-winners" class="py-2 px-4 text-sm font-medium text-primary-DEFAULT bg-white border-t border-b border-r border-primary-DEFAULT hover:text-white hover:bg-primary-DEFAULT transition-colors filter-btn">
                     Призеры
                 </button>
@@ -567,11 +568,11 @@
                     <div class="flex items-center">
                         <div class="text-4xl text-primary-light mr-3"><i class="fas fa-laptop-code"></i></div>
                         <div>
-                            <h3 class="text-xl font-bold text-white">ФСПМО</h3>
-                            <p class="text-gray-400 text-sm">Федерация спортивного программирования МО</p>
+                            <h3 class="text-xl font-bold text-white">ФСПЗО</h3>
+                            <p class="text-gray-400 text-sm">Федерация спортивного программирования ЗО</p>
                         </div>
                     </div>
-                    <p class="text-gray-300">Федерация спортивного программирования Московской области развивает и поддерживает талантливых программистов региона.</p>
+                    <p class="text-gray-300">Федерация спортивного программирования Запорожской области развивает и поддерживает талантливых программистов региона.</p>
                     <div class="flex space-x-4">
                         <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
                             <span class="sr-only">Telegram</span>
@@ -623,7 +624,7 @@
                 </div>
             </div>
             <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-                <p class="mb-4">© {{ now.year }} Федерация спортивного программирования Московской области. Все права защищены.</p>
+                <p class="mb-4">© {{ now.year }} Федерация спортивного программирования Запорожской области. Все права защищены.</p>
                 <div class="flex justify-center space-x-6 mb-4">
                     <a href="#" class="text-gray-400 hover:text-white transition-colors">Политика конфиденциальности</a>
                     <a href="#" class="text-gray-400 hover:text-white transition-colors">Условия использования</a>
@@ -745,5 +746,37 @@
         {% endif %}
     });
 </script>
+<style>
+  .filter-btn:hover {
+    color: white !important;
+    background-color: #5b21b6 !important; /* purple-800 */
+  }
+
+  .filter-btn.active {
+    color: white;
+    background-color: #8b5cf6; /* purple-500 */
+  }
+
+  .filter-btn:not(.active) {
+    color: #8b5cf6;
+    background-color: white;
+  }
+  .register-btn-pulse {
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(139, 92, 246, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+    }
+}
+</style>
 </body>
 </html>
