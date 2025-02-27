@@ -4,6 +4,101 @@
 {% block title %}Панель управления | Админ-панель ФСПЗО{% endblock %}
 {% block page_title %}Панель управления{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Calendar styling */
+    .calendar-event {
+        font-size: 0.7em;
+        padding: 1px 2px;
+        margin-bottom: 1px;
+        border-radius: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: white;
+    }
+
+    .event-algorithmic {
+        background-color: #3b82f6; /* blue */
+    }
+
+    .event-product {
+        background-color: #10b981; /* green */
+    }
+
+    .event-robotics {
+        background-color: #f59e0b; /* amber/orange */
+    }
+
+    .event-other {
+        background-color: #6b7280; /* gray */
+    }
+
+    .calendar-day.today {
+        background-color: #f3f4f6;
+        font-weight: bold;
+    }
+
+    .more-events {
+        font-size: 0.65em;
+        text-align: center;
+        color: #6b7280;
+    }
+
+    .discipline-card {
+        transition: all 0.3s ease-in-out;
+    }
+
+    .discipline-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .discipline-card-algorithmic {
+        border-left: 4px solid #3b82f6;
+    }
+
+    .discipline-card-product {
+        border-left: 4px solid #10b981;
+    }
+
+    .discipline-card-robotics {
+        border-left: 4px solid #f59e0b;
+    }
+
+    .discipline-card-other {
+        border-left: 4px solid #6b7280;
+    }
+
+    .hover-card {
+        transition: all 0.3s ease;
+    }
+
+    .hover-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        background-color: rgba(139, 92, 246, 0.05) !important;
+    }
+
+    .dashboard-card {
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .dashboard-card .card-icon {
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card:hover .card-icon {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <!-- Блок с суммарной статистикой -->
 <div class="row">
@@ -81,7 +176,7 @@
                             <tr>
                                 <th>Название</th>
                                 <th>Дата</th>
-                                <th>Место</th>
+                                <th>Дисциплина</th>
                                 <th>Действия</th>
                             </tr>
                         </thead>
@@ -90,7 +185,17 @@
                             <tr>
                                 <td>{{ event.title }}</td>
                                 <td>{{ event.start_date.strftime('%d.%m.%Y %H:%M') }}</td>
-                                <td>{{ event.location }}</td>
+                                <td>
+                                    {% if event.discipline == 'algorithmic' %}
+                                    <span class="badge bg-primary">Алгоритмическое</span>
+                                    {% elif event.discipline == 'product' %}
+                                    <span class="badge bg-success">Продуктовое</span>
+                                    {% elif event.discipline == 'robotics' %}
+                                    <span class="badge bg-warning text-dark">Робототехника</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Другое</span>
+                                    {% endif %}
+                                </td>
                                 <td>
                                     <div class="btn-group">
                                         <a href="{{ url_for('admin_events_edit', id=event.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
@@ -114,35 +219,42 @@
                 <span>Мероприятия по дисциплинам</span>
             </div>
             <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4 text-center mb-3">
-                        <div class="p-3 bg-light rounded">
+                <div class="row mb-4">
+                    <div class="col-md-3 text-center">
+                        <div class="p-3 bg-light rounded discipline-card discipline-card-algorithmic">
                             <div class="display-4 text-primary-emphasis">
-                                {{ algorithms_events_count if algorithms_events_count is defined else 0 }}
+                                {{ algorithmic_events_count }}
                             </div>
                             <div class="text-muted">Алгоритмическое</div>
                         </div>
                     </div>
-                    <div class="col-md-4 text-center mb-3">
-                        <div class="p-3 bg-light rounded">
+                    <div class="col-md-3 text-center">
+                        <div class="p-3 bg-light rounded discipline-card discipline-card-product">
                             <div class="display-4 text-primary-emphasis">
-                                {{ product_events_count if product_events_count is defined else 0 }}
+                                {{ product_events_count }}
                             </div>
                             <div class="text-muted">Продуктовое</div>
                         </div>
                     </div>
-                    <div class="col-md-4 text-center mb-3">
-                        <div class="p-3 bg-light rounded">
+                    <div class="col-md-3 text-center">
+                        <div class="p-3 bg-light rounded discipline-card discipline-card-robotics">
                             <div class="display-4 text-primary-emphasis">
-                                {{ robotics_events_count if robotics_events_count is defined else 0 }}
+                                {{ robotics_events_count }}
                             </div>
                             <div class="text-muted">Робототехника</div>
                         </div>
                     </div>
+                    <div class="col-md-3 text-center">
+                        <div class="p-3 bg-light rounded discipline-card discipline-card-other">
+                            <div class="display-4 text-primary-emphasis">
+                                {{ other_events_count }}
+                            </div>
+                            <div class="text-muted">Другое</div>
+                        </div>
+                    </div>
                 </div>
-
                 <div class="text-center mt-3">
-                    <a href="{{ url_for('admin_events_list') }}" class="btn btn-outline-primary btn-sm">
+                    <a href="{{ url_for('admin_events_create') }}" class="btn btn-primary btn-sm">
                         <i class="bi bi-plus-circle"></i> Добавить мероприятие
                     </a>
                 </div>
@@ -151,30 +263,78 @@
 
         <!-- Календарь ближайшего месяца -->
         <div class="card">
-            <div class="card-header">
-                <span>Календарь на {{ now.strftime('%B %Y') }}</span>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Календарь на {{ calendar_data.month_name }} {{ calendar_data.year }}</span>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-outline-secondary" id="prevMonth">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" id="nextMonth">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
             </div>
             <div class="card-body p-0">
+                <div class="d-flex justify-content-between px-3 pt-2">
+                    <div class="d-flex align-items-center me-3">
+                        <div class="me-1" style="width:10px; height:10px; background-color: #3b82f6; border-radius: 50%;"></div>
+                        <small>Алгоритмическое</small>
+                    </div>
+                    <div class="d-flex align-items-center me-3">
+                        <div class="me-1" style="width:10px; height:10px; background-color: #10b981; border-radius: 50%;"></div>
+                        <small>Продуктовое</small>
+                    </div>
+                    <div class="d-flex align-items-center me-3">
+                        <div class="me-1" style="width:10px; height:10px; background-color: #f59e0b; border-radius: 50%;"></div>
+                        <small>Робототехника</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="me-1" style="width:10px; height:10px; background-color: #6b7280; border-radius: 50%;"></div>
+                        <small>Другое</small>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-bordered m-0">
                         <thead>
                             <tr>
-                                <th>Пн</th>
-                                <th>Вт</th>
-                                <th>Ср</th>
-                                <th>Чт</th>
-                                <th>Пт</th>
-                                <th>Сб</th>
-                                <th>Вс</th>
+                                <th class="text-center">Пн</th>
+                                <th class="text-center">Вт</th>
+                                <th class="text-center">Ср</th>
+                                <th class="text-center">Чт</th>
+                                <th class="text-center">Пт</th>
+                                <th class="text-center">Сб</th>
+                                <th class="text-center">Вс</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for week in calendar_data %}
+                            {% for week in calendar_data.weeks %}
                             <tr>
                                 {% for day in week %}
-                                <td class="p-2 text-center {% if day.today %}bg-light{% endif %} {% if day.has_event %}text-primary fw-bold{% endif %}">
+                                <td class="p-1 {% if day.today %}today{% endif %}" style="height: 100px; width: 14.28%; vertical-align: top;">
                                     {% if day.day > 0 %}
-                                        {{ day.day }}
+                                    <div class="d-flex justify-content-between px-1">
+                                        <div>{{ day.day }}</div>
+                                        {% if day.total_events > 0 %}
+                                        <div class="event-count">
+                                            <small class="badge bg-secondary">{{ day.total_events }}</small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="events-container mt-1">
+                                        {% for event in day.events %}
+                                        <div class="calendar-event event-{{ event.discipline }}"
+                                             title="{{ event.title }}"
+                                             data-bs-toggle="tooltip"
+                                             data-event-id="{{ event.id }}">
+                                            <small>{{ event.time }} {{ event.title|truncate(10) }}</small>
+                                        </div>
+                                        {% endfor %}
+
+                                        {% if day.has_more %}
+                                        <div class="more-events">+ ещё {{ day.total_events - 3 }}</div>
+                                        {% endif %}
+                                    </div>
                                     {% endif %}
                                 </td>
                                 {% endfor %}
@@ -233,6 +393,88 @@
             </div>
         </div>
 
+        <!-- Ближайшие мероприятия по дисциплинам -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <span>Ближайшие мероприятия по дисциплинам</span>
+            </div>
+            <div class="card-body p-0">
+                <ul class="nav nav-tabs" id="disciplineTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="algorithmic-tab" data-bs-toggle="tab" data-bs-target="#algorithmic" type="button" role="tab" aria-controls="algorithmic" aria-selected="true">
+                            Алгоритмическое
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="product-tab" data-bs-toggle="tab" data-bs-target="#product" type="button" role="tab" aria-controls="product" aria-selected="false">
+                            Продуктовое
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="robotics-tab" data-bs-toggle="tab" data-bs-target="#robotics" type="button" role="tab" aria-controls="robotics" aria-selected="false">
+                            Робототехника
+                        </button>
+                    </li>
+                </ul>
+                <div class="tab-content p-3" id="disciplineTabsContent">
+                    <div class="tab-pane fade show active" id="algorithmic" role="tabpanel" aria-labelledby="algorithmic-tab">
+                        {% if upcoming_algorithmic %}
+                        <div class="list-group">
+                            {% for event in upcoming_algorithmic %}
+                            <a href="{{ url_for('admin_events_edit', id=event.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ event.title }}</h5>
+                                    <small>{{ event.start_date.strftime('%d.%m.%Y') }}</small>
+                                </div>
+                                <p class="mb-1">{{ event.location }}</p>
+                                <small>{{ event.start_date.strftime('%H:%M') }} - {{ event.end_date.strftime('%H:%M') }}</small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-center text-muted my-3">Нет предстоящих мероприятий по алгоритмическому программированию</p>
+                        {% endif %}
+                    </div>
+                    <div class="tab-pane fade" id="product" role="tabpanel" aria-labelledby="product-tab">
+                        {% if upcoming_product %}
+                        <div class="list-group">
+                            {% for event in upcoming_product %}
+                            <a href="{{ url_for('admin_events_edit', id=event.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ event.title }}</h5>
+                                    <small>{{ event.start_date.strftime('%d.%m.%Y') }}</small>
+                                </div>
+                                <p class="mb-1">{{ event.location }}</p>
+                                <small>{{ event.start_date.strftime('%H:%M') }} - {{ event.end_date.strftime('%H:%M') }}</small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-center text-muted my-3">Нет предстоящих мероприятий по продуктовому программированию</p>
+                        {% endif %}
+                    </div>
+                    <div class="tab-pane fade" id="robotics" role="tabpanel" aria-labelledby="robotics-tab">
+                        {% if upcoming_robotics %}
+                        <div class="list-group">
+                            {% for event in upcoming_robotics %}
+                            <a href="{{ url_for('admin_events_edit', id=event.id) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1">{{ event.title }}</h5>
+                                    <small>{{ event.start_date.strftime('%d.%m.%Y') }}</small>
+                                </div>
+                                <p class="mb-1">{{ event.location }}</p>
+                                <small>{{ event.start_date.strftime('%H:%M') }} - {{ event.end_date.strftime('%H:%M') }}</small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p class="text-center text-muted my-3">Нет предстоящих мероприятий по робототехнике</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Быстрые действия -->
         <div class="card mb-4">
             <div class="card-header">
@@ -241,37 +483,37 @@
             <div class="card-body">
                 <div class="row text-center">
                     <div class="col-6 col-md-4 mb-3">
-                        <a href="{{ url_for('admin_news_create') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                        <a href="{{ url_for('admin_news_create') }}" class="d-block p-3 rounded bg-light text-decoration-none hover-card">
                             <i class="bi bi-plus-circle fs-2 d-block mb-2 text-primary"></i>
                             <span>Добавить новость</span>
                         </a>
                     </div>
                     <div class="col-6 col-md-4 mb-3">
-                        <a href="{{ url_for('admin_events_create') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                        <a href="{{ url_for('admin_events_create') }}" class="d-block p-3 rounded bg-light text-decoration-none hover-card">
                             <i class="bi bi-calendar-plus fs-2 d-block mb-2 text-primary"></i>
                             <span>Создать мероприятие</span>
                         </a>
                     </div>
                     <div class="col-6 col-md-4 mb-3">
-                        <a href="{{ url_for('admin_participants_list') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                        <a href="{{ url_for('admin_participants_list') }}" class="d-block p-3 rounded bg-light text-decoration-none hover-card">
                             <i class="bi bi-person-plus fs-2 d-block mb-2 text-primary"></i>
                             <span>Участники</span>
                         </a>
                     </div>
                     <div class="col-6 col-md-4 mb-3">
-                        <a href="{{ url_for('admin_gallery_list') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                        <a href="{{ url_for('admin_gallery_list') }}" class="d-block p-3 rounded bg-light text-decoration-none hover-card">
                             <i class="bi bi-images fs-2 d-block mb-2 text-primary"></i>
                             <span>Галерея</span>
                         </a>
                     </div>
                     <div class="col-6 col-md-4 mb-3">
-                        <a href="{{ url_for('admin_statistics') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                        <a href="{{ url_for('admin_statistics') }}" class="d-block p-3 rounded bg-light text-decoration-none hover-card">
                             <i class="bi bi-bar-chart fs-2 d-block mb-2 text-primary"></i>
                             <span>Статистика</span>
                         </a>
                     </div>
                     <div class="col-6 col-md-4 mb-3">
-                        <a href="{{ url_for('admin_partners_list') }}" class="d-block p-3 rounded bg-light text-decoration-none">
+                        <a href="{{ url_for('admin_partners_list') }}" class="d-block p-3 rounded bg-light text-decoration-none hover-card">
                             <i class="bi bi-building fs-2 d-block mb-2 text-primary"></i>
                             <span>Партнеры</span>
                         </a>
@@ -315,10 +557,243 @@
         </div>
     </div>
 </div>
+
+<!-- Модальное окно для детальной информации о событии в календаре -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-labelledby="eventDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventDetailsModalLabel">Информация о мероприятии</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+            </div>
+            <div class="modal-body">
+                <div id="eventDetailsContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Загрузка...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                <a href="#" class="btn btn-primary" id="editEventLink">Редактировать</a>
+                <a href="#" class="btn btn-info" id="participantsEventLink">Участники</a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // При необходимости добавьте JavaScript для обработки календаря или других интерактивных элементов
+    document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация всплывающих подсказок
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Обработка нажатий на события в календаре
+        const calendarEvents = document.querySelectorAll('.calendar-event');
+        const eventModal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+
+        calendarEvents.forEach(event => {
+            event.addEventListener('click', function() {
+                const eventId = this.getAttribute('data-event-id');
+                const eventTitle = this.getAttribute('title');
+
+                // Заполняем модальное окно данными о событии
+                document.getElementById('eventDetailsModalLabel').textContent = eventTitle;
+                document.getElementById('editEventLink').href = `/admin/events/edit/${eventId}`;
+                document.getElementById('participantsEventLink').href = `/admin/events/${eventId}/participants`;
+
+                // Здесь можно сделать AJAX-запрос для получения дополнительной информации
+                // о событии, если это необходимо
+
+                // Загружаем основную информацию о событии
+                fetch(`/api/events/${eventId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Не удалось загрузить информацию о событии');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Заполняем контент модального окна данными о событии
+                        let html = `
+                            <div class="event-details">
+                                <h4>${data.title}</h4>
+                                <div class="mb-3">
+                                    <span class="badge ${getBadgeClassForDiscipline(data.discipline)}">
+                                        ${getDisplayNameForDiscipline(data.discipline)}
+                                    </span>
+                                </div>
+                                <div class="mb-2">
+                                    <i class="bi bi-calendar-event me-2"></i>
+                                    ${formatDate(data.start_date)}
+                                </div>
+                                <div class="mb-2">
+                                    <i class="bi bi-clock me-2"></i>
+                                    ${formatTime(data.start_date)} - ${formatTime(data.end_date)}
+                                </div>
+                                <div class="mb-2">
+                                    <i class="bi bi-geo-alt me-2"></i>
+                                    ${data.location}
+                                </div>
+                                ${data.registration_link ? `
+                                <div class="mb-3">
+                                    <i class="bi bi-link-45deg me-2"></i>
+                                    <a href="${data.registration_link}" target="_blank">Ссылка на регистрацию</a>
+                                </div>` : ''}
+                                <div class="mb-3">
+                                    <strong>Описание:</strong>
+                                    <div class="mt-2">${data.description}</div>
+                                </div>
+                            </div>
+                        `;
+                        document.getElementById('eventDetailsContent').innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Ошибка:', error);
+                        document.getElementById('eventDetailsContent').innerHTML = `
+                            <div class="alert alert-danger">
+                                Не удалось загрузить информацию о событии. Попробуйте позже.
+                            </div>
+                        `;
+                    });
+
+                // Показываем модальное окно
+                eventModal.show();
+            });
+        });
+
+        // Функции для форматирования даты и времени
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function formatTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Функция для определения класса бейджа по дисциплине
+        function getBadgeClassForDiscipline(discipline) {
+            switch(discipline) {
+                case 'algorithmic':
+                    return 'bg-primary';
+                case 'product':
+                    return 'bg-success';
+                case 'robotics':
+                    return 'bg-warning text-dark';
+                default:
+                    return 'bg-secondary';
+            }
+        }
+
+        // Функция для получения отображаемого названия дисциплины
+        function getDisplayNameForDiscipline(discipline) {
+            switch(discipline) {
+                case 'algorithmic':
+                    return 'Алгоритмическое программирование';
+                case 'product':
+                    return 'Продуктовое программирование';
+                case 'robotics':
+                    return 'Робототехника';
+                default:
+                    return 'Другое';
+            }
+        }
+
+        // Обработчики кнопок переключения месяцев в календаре
+        const prevMonthBtn = document.getElementById('prevMonth');
+        const nextMonthBtn = document.getElementById('nextMonth');
+
+        if (prevMonthBtn && nextMonthBtn) {
+            prevMonthBtn.addEventListener('click', function() {
+                navigateCalendar(-1);
+            });
+
+            nextMonthBtn.addEventListener('click', function() {
+                navigateCalendar(1);
+            });
+        }
+
+        // Функция навигации по календарю
+        function navigateCalendar(direction) {
+            const currentMonth = {{ calendar_data.month }};
+            const currentYear = {{ calendar_data.year }};
+
+            let newMonth = currentMonth + direction;
+            let newYear = currentYear;
+
+            if (newMonth < 1) {
+                newMonth = 12;
+                newYear -= 1;
+            } else if (newMonth > 12) {
+                newMonth = 1;
+                newYear += 1;
+            }
+
+            // Перезагрузка страницы с новыми параметрами
+            window.location.href = `${window.location.pathname}?month=${newMonth}&year=${newYear}`;
+        }
+
+        // Анимации для карточек на панели инструментов
+        const hoverCards = document.querySelectorAll('.hover-card');
+
+        hoverCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.classList.add('shadow-sm');
+                this.style.transform = 'translateY(-5px)';
+                this.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.classList.remove('shadow-sm');
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Анимация появления чисел в статистике
+        function animateCounters() {
+            const statElements = document.querySelectorAll('.dashboard-card h3');
+
+            statElements.forEach(element => {
+                const finalValue = parseInt(element.innerText);
+                let startValue = 0;
+                const duration = 1500;
+                const startTime = performance.now();
+
+                function updateCounter(currentTime) {
+                    const elapsedTime = currentTime - startTime;
+                    if (elapsedTime < duration) {
+                        const progress = elapsedTime / duration;
+                        const currentValue = Math.floor(progress * finalValue);
+                        element.innerText = currentValue;
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        element.innerText = finalValue;
+                    }
+                }
+
+                requestAnimationFrame(updateCounter);
+            });
+        }
+
+        // Запускаем анимацию после загрузки страницы
+        window.addEventListener('load', function() {
+            animateCounters();
+        });
+    });
 </script>
 {% endblock %}

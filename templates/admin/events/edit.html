@@ -59,6 +59,16 @@
                 <input type="url" class="form-control" id="registration_link" name="registration_link" value="{{ event.registration_link }}">
                 <div class="form-text">Необязательно. Если указана, на странице мероприятия будет отображаться кнопка "Регистрация".</div>
             </div>
+            <div class="mb-3">
+    <label for="discipline" class="form-label">Дисциплина</label>
+    <select class="form-select" id="discipline" name="discipline" required>
+        <option value="algorithmic" {% if event.discipline == 'algorithmic' %}selected{% endif %}>Алгоритмическое программирование</option>
+        <option value="product" {% if event.discipline == 'product' %}selected{% endif %}>Продуктовое программирование</option>
+        <option value="robotics" {% if event.discipline == 'robotics' %}selected{% endif %}>Робототехника</option>
+        <option value="other" {% if event.discipline == 'other' or not event.discipline %}selected{% endif %}>Другое</option>
+    </select>
+    <div class="form-text">Выберите дисциплину, к которой относится мероприятие.</div>
+</div>
 
             <div class="mb-3">
                 <label for="image" class="form-label">Изображение</label>

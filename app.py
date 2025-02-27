@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -92,6 +92,8 @@ class Event(db.Model):
     end_date = db.Column(db.DateTime, nullable=False)
     registration_link = db.Column(db.String(200))
     published = db.Column(db.Boolean, default=True)
+    # New field for discipline
+    discipline = db.Column(db.String(50), default='other')  # 'algorithmic', 'product', 'robotics', 'other'
 
     def __repr__(self):
         return f'<Event {self.title}>'
@@ -610,8 +612,14 @@ def allowed_file(filename):
 # Роуты администрирования
 
 @app.route('/admin')
+@app.route('/admin/dashboard')
 @login_required
 def admin_dashboard():
+    """Главная страница админ-панели"""
+    # Получаем параметры для календаря из GET-параметров (если есть)
+    month = request.args.get('month', type=int)
+    year = request.args.get('year', type=int)
+
     news_count = News.query.count()
     events_count = Event.query.count()
     participants_count = Participant.query.count()
@@ -624,13 +632,50 @@ def admin_dashboard():
     # Последние новости
     recent_news = News.query.order_by(News.created_at.desc()).limit(5).all()
 
+    # Последние изображения галереи
+    recent_gallery_images = Gallery.query.order_by(Gallery.created_at.desc()).limit(6).all()
+
+    # Статистика по дисциплинам
+    algorithmic_events_count = Event.query.filter_by(discipline='algorithmic').count()
+    product_events_count = Event.query.filter_by(discipline='product').count()
+    robotics_events_count = Event.query.filter_by(discipline='robotics').count()
+    other_events_count = Event.query.filter_by(discipline='other').count()
+
+    # Предстоящие события по дисциплинам (для быстрого доступа)
+    upcoming_algorithmic = Event.query.filter(
+        Event.discipline == 'algorithmic',
+        Event.start_date >= datetime.utcnow()
+    ).order_by(Event.start_date).limit(3).all()
+
+    upcoming_product = Event.query.filter(
+        Event.discipline == 'product',
+        Event.start_date >= datetime.utcnow()
+    ).order_by(Event.start_date).limit(3).all()
+
+    upcoming_robotics = Event.query.filter(
+        Event.discipline == 'robotics',
+        Event.start_date >= datetime.utcnow()
+    ).order_by(Event.start_date).limit(3).all()
+
+    # Генерируем данные для календаря
+    calendar_data = generate_calendar_data(year, month)
+
     return render_template('admin/dashboard.html',
                            news_count=news_count,
                            events_count=events_count,
                            participants_count=participants_count,
                            partners_count=partners_count,
                            upcoming_events=upcoming_events,
-                           recent_news=recent_news)
+                           recent_news=recent_news,
+                           recent_gallery_images=recent_gallery_images,
+                           algorithmic_events_count=algorithmic_events_count,
+                           product_events_count=product_events_count,
+                           robotics_events_count=robotics_events_count,
+                           other_events_count=other_events_count,
+                           upcoming_algorithmic=upcoming_algorithmic,
+                           upcoming_product=upcoming_product,
+                           upcoming_robotics=upcoming_robotics,
+                           calendar_data=calendar_data)
 
 
 # Управление новостями
@@ -739,6 +784,7 @@ def admin_events_create():
         end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d %H:%M')
         registration_link = request.form.get('registration_link')
         published = True if request.form.get('published') else False
+        discipline = request.form.get('discipline', 'other')  # Дисциплина, по умолчанию 'other'
 
         event = Event(
             title=title,
@@ -747,7 +793,8 @@ def admin_events_create():
             start_date=start_date,
             end_date=end_date,
             registration_link=registration_link,
-            published=published
+            published=published,
+            discipline=discipline
         )
 
         # Обработка загрузки изображения
@@ -782,6 +829,7 @@ def admin_events_edit(id):
         event.end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d %H:%M')
         event.registration_link = request.form.get('registration_link')
         event.published = True if request.form.get('published') else False
+        event.discipline = request.form.get('discipline', 'other')  # Обновление дисциплины
 
         # Обработка загрузки изображения
         if 'image' in request.files:
@@ -1215,24 +1263,22 @@ def admin_profile():
 
 
 # API для получения данных для фронтенда
-@app.route('/api/events')
-def api_events():
-    events = Event.query.filter_by(published=True).order_by(Event.start_date).all()
-    events_data = []
+@app.route('/api/events/<int:event_id>')
+@login_required
+def api_event_detail(event_id):
+    """API endpoint для получения данных о событии"""
+    event = Event.query.get_or_404(event_id)
 
-    for event in events:
-        events_data.append({
-            'id': event.id,
-            'title': event.title,
-            'description': event.description,
-            'location': event.location,
-            'image': event.image,
-            'start_date': event.start_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'end_date': event.end_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'registration_link': event.registration_link
-        })
-
-    return json.dumps(events_data)
+    return jsonify({
+        'id': event.id,
+        'title': event.title,
+        'description': event.description,
+        'location': event.location,
+        'start_date': event.start_date.strftime('%Y-%m-%dT%H:%M:%S'),
+        'end_date': event.end_date.strftime('%Y-%m-%dT%H:%M:%S'),
+        'discipline': event.discipline,
+        'registration_link': event.registration_link
+    })
 
 
 @app.route('/api/news')
@@ -1424,6 +1470,101 @@ def event_detail(id):
                            participants=participants,
                            debug_info=debug_info)
 
+
+def generate_calendar_data(year=None, month=None):
+    """Generate calendar data for displaying in the dashboard with event information"""
+    from datetime import datetime, timedelta
+    import calendar
+
+    # If no year/month specified, use current date
+    if year is None or month is None:
+        current_date = datetime.now()
+        year = current_date.year
+        month = current_date.month
+
+    # Get first day of month and number of days in month
+    first_day = datetime(year, month, 1)
+    _, num_days = calendar.monthrange(year, month)
+
+    # Get day of week for the first day (Monday is 0 in Python's calendar)
+    first_weekday = first_day.weekday()
+
+    # Generate calendar grid (a list of weeks, where each week is a list of days)
+    weeks = []
+    week = [{'day': 0, 'today': False, 'events': []} for _ in range(7)]
+
+    # Fill in the first week with empty cells before the 1st day of month
+    for i in range(first_weekday):
+        week[i] = {'day': 0, 'today': False, 'events': []}
+
+    # Fill in the actual days
+    current_date = datetime.now().date()
+    day = 1
+
+    # Get all events in this month
+    start_of_month = datetime(year, month, 1)
+    if month == 12:
+        end_of_month = datetime(year + 1, 1, 1) - timedelta(days=1)
+    else:
+        end_of_month = datetime(year, month + 1, 1) - timedelta(days=1)
+
+    events_this_month = Event.query.filter(
+        Event.start_date >= start_of_month,
+        Event.start_date <= end_of_month
+    ).all()
+
+    # Create a dictionary of events by day
+    events_by_day = {}
+    for event in events_this_month:
+        event_day = event.start_date.day
+        if event_day not in events_by_day:
+            events_by_day[event_day] = []
+
+        # Only add the first 3 events for display purposes
+        if len(events_by_day[event_day]) < 3:
+            events_by_day[event_day].append({
+                'id': event.id,
+                'title': event.title,
+                'discipline': event.discipline,
+                'time': event.start_date.strftime('%H:%M')
+            })
+
+    # Fill the calendar
+    while day <= num_days:
+        for i in range(first_weekday, 7):
+            if day <= num_days:
+                is_today = (day == current_date.day and
+                            month == current_date.month and
+                            year == current_date.year)
+
+                day_events = events_by_day.get(day, [])
+                has_more_events = len(events_by_day.get(day, [])) > 3
+
+                # Only include the first 3 events for display, but note if there are more
+                week[i] = {
+                    'day': day,
+                    'today': is_today,
+                    'events': day_events[:3],
+                    'has_more': has_more_events,
+                    'total_events': len(day_events)
+                }
+                day += 1
+            else:
+                week[i] = {'day': 0, 'today': False, 'events': [], 'has_more': False, 'total_events': 0}
+
+        weeks.append(week.copy())
+        week = [{'day': 0, 'today': False, 'events': [], 'has_more': False, 'total_events': 0} for _ in range(7)]
+        first_weekday = 0  # For all subsequent weeks, start from Monday
+
+    # Also include month name and year for display
+    month_name = first_day.strftime('%B')
+
+    return {
+        'weeks': weeks,
+        'month_name': month_name,
+        'year': year,
+        'month': month
+    }
 
 @app.route('/participants')
 def participants_list():
