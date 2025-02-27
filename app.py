@@ -611,6 +611,7 @@ def allowed_file(filename):
 
 # Роуты администрирования
 
+# Modified part of the admin_dashboard route to properly handle calendar navigation
 @app.route('/admin')
 @app.route('/admin/dashboard')
 @login_required
@@ -619,6 +620,14 @@ def admin_dashboard():
     # Получаем параметры для календаря из GET-параметров (если есть)
     month = request.args.get('month', type=int)
     year = request.args.get('year', type=int)
+
+    # Set default values if not provided
+    if month is None or year is None:
+        current_date = datetime.now()
+        if month is None:
+            month = current_date.month
+        if year is None:
+            year = current_date.year
 
     news_count = News.query.count()
     events_count = Event.query.count()
