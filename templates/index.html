@@ -177,62 +177,116 @@
     </div>
 </section>
 
-<!-- О Федерации -->
-<section id="about" class="py-20">
+<!-- О Федерации - полностью переработанный раздел -->
+<!-- О Федерации - с исправленными элементами -->
+<section id="about" class="py-20 bg-gray-50">
     <div class="container mx-auto px-4">
-        <h2 class="text-3xl text-center text-black font-bold mb-6" data-aos="fade-up">О Федерации</h2>
-        <div class="text-center max-w-3xl mx-auto mb-16" data-aos="fade-up" data-aos-delay="100">
-            <p class="text-gray-600">Объединяем профессионалов и энтузиастов спортивного программирования для развития IT-потенциала Запорожской области</p>
-        </div>
-        <div class="grid md:grid-cols-2 gap-12 items-center">
-            <div class="space-y-6" data-aos="fade-right">
-                <p class="text-lg">Федерация спортивного программирования Запорожской области - это организация, объединяющая профессионалов и энтузиастов в области спортивного программирования. Мы проводим соревнования различного уровня, от школьных турниров до профессиональных чемпионатов.</p>
-                <h3 class="text-xl text-black font-bold">Структура федерации</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {% if federation_structure %}
-                        {% for member in federation_structure %}
-                        <div class="team-card p-4 rounded-lg shadow-md hover:scale-105 transition-transform" data-aos="zoom-in" data-aos-delay="{{ loop.index * 100 }}">
-                            <div class="flex items-center mb-3">
-                                <div class="text-2xl text-primary-DEFAULT mr-3">
-                                    {% if member.icon %}
-                                    <i class="{{ member.icon }}"></i>
-                                    {% else %}
-                                    <i class="fas fa-user"></i>
-                                    {% endif %}
-                                </div>
-                                <h4 class="text-lg font-semibold text-black">{{ member.position }}</h4>
-                            </div>
-                            <div class="flex items-start mb-3">
-                                {% if member.photo %}
-                                <img src="{{ url_for('static', filename=member.photo) }}" alt="{{ member.name }}" class="w-16 h-16 object-cover rounded-full mr-3">
-                                {% endif %}
-                                <div>
-                                    <p class="font-bold">{{ member.name }}</p>
-                                    {% if member.description %}
-                                    <p class="text-sm text-gray-700 mt-1">{{ member.description }}</p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    {% else %}{% endif %}
-                </div>
-            </div>
-            <div data-aos="fade-left">
-                <div class="relative rounded-lg shadow-lg overflow-hidden group">
-                    <img src="{{ url_for('static', filename='img/about.jpg') }}" alt="О федерации" class="rounded-lg shadow-lg w-full transition-transform duration-500 group-hover:scale-105">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-0 group-hover:opacity-70 transition-opacity duration-300 flex items-end">
-                        <div class="p-4 text-white">
-                            <h3 class="font-bold">Команда ФСПЗО на Всероссийском чемпионате, 2024 г.</h3>
-                        </div>
+        <h2 class="text-3xl text-center font-bold mb-12" data-aos="fade-up">О Федерации</h2>
+
+        <!-- Основная информация -->
+        <div class="bg-white rounded-2xl shadow-lg p-8 mb-12" data-aos="fade-up">
+            <div class="grid md:grid-cols-2 gap-10 items-center">
+                <div class="space-y-6">
+                    <h3 class="text-2xl font-bold text-primary-DEFAULT">Наша миссия</h3>
+                    <p class="text-lg leading-relaxed">Федерация спортивного программирования Запорожской области объединяет профессионалов и энтузиастов в области IT для развития интеллектуального потенциала региона.</p>
+                    <p class="text-lg leading-relaxed">Мы создаем эффективную систему подготовки талантливых программистов, способных достойно представлять Запорожскую область на соревнованиях российского и международного уровня.</p>
+
+                    <div class="flex space-x-4 pt-6">
+                        <a href="{{ url_for('events_list') }}" class="bg-primary-DEFAULT hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-bold transition-colors inline-flex items-center">
+                            <i class="fas fa-trophy mr-2"></i>
+                            Соревнования
+                        </a>
+                        <!-- Исправлена кнопка "Связаться" - убран hover эффект для фона -->
+                        <a href="{{ url_for('contacts') }}" class="bg-white border-2 border-primary-DEFAULT text-primary-DEFAULT hover:text-primary-dark px-8 py-3 rounded-lg font-bold transition-colors inline-flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Связаться
+                        </a>
                     </div>
                 </div>
-                <div class="mt-6 bg-team-card-bg p-4 rounded-lg shadow-md">
-                    <h3 class="text-xl text-black font-bold mb-3">Наша миссия</h3>
-                    <p class="text-gray-700">Создание эффективной системы подготовки талантливых спортивных программистов, способных достойно представлять Запорожскую область на соревнованиях российского и международного уровня.</p>
+
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="bg-primary-light bg-opacity-10 p-6 rounded-xl flex flex-col items-center justify-center text-center">
+                        <div class="text-4xl text-primary-DEFAULT mb-3"><i class="fas fa-users"></i></div>
+                        <h4 class="text-lg font-bold mb-1">Сообщество</h4>
+                        <p class="text-gray-600">Развиваем IT-сообщество региона</p>
+                    </div>
+                    <div class="bg-primary-light bg-opacity-10 p-6 rounded-xl flex flex-col items-center justify-center text-center">
+                        <div class="text-4xl text-primary-DEFAULT mb-3"><i class="fas fa-laptop-code"></i></div>
+                        <h4 class="text-lg font-bold mb-1">Обучение</h4>
+                        <p class="text-gray-600">Проводим тренинги и воркшопы</p>
+                    </div>
+                    <div class="bg-primary-light bg-opacity-10 p-6 rounded-xl flex flex-col items-center justify-center text-center">
+                        <div class="text-4xl text-primary-DEFAULT mb-3"><i class="fas fa-medal"></i></div>
+                        <h4 class="text-lg font-bold mb-1">Соревнования</h4>
+                        <p class="text-gray-600">Организуем турниры всех уровней</p>
+                    </div>
+                    <div class="bg-primary-light bg-opacity-10 p-6 rounded-xl flex flex-col items-center justify-center text-center">
+                        <div class="text-4xl text-primary-DEFAULT mb-3"><i class="fas fa-handshake"></i></div>
+                        <h4 class="text-lg font-bold mb-1">Партнерство</h4>
+                        <p class="text-gray-600">Сотрудничаем с IT-компаниями</p>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Структура федерации -->
+        <h3 class="text-2xl font-bold text-center mb-8" data-aos="fade-up">Структура федерации</h3>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {% if federation_structure %}
+                {% for member in federation_structure %}
+                <!-- Исправленная карточка участника с черной иконкой -->
+<div class="bg-white rounded-2xl shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+    <div class="p-6 flex flex-col items-center text-center">
+        <!-- Фото с цветной рамкой -->
+        <div class="mb-4 relative inline-block">
+            {% if member.photo %}
+            <div class="w-36 h-36 rounded-full border-4 border-primary-light overflow-hidden">
+                <img src="{{ url_for('static', filename=member.photo) }}" alt="{{ member.name }}" class="w-full h-full object-cover">
+            </div>
+            {% else %}
+            <div class="w-36 h-36 rounded-full border-4 border-primary-light bg-gray-100 flex items-center justify-center">
+                <span class="text-5xl font-bold text-primary-DEFAULT">{{ member.name[0] | upper }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Квадратная иконка должности с ЧЕРНЫМ цветом иконки -->
+            <div class="absolute bottom-0 right-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-md border border-gray-200">
+                {% if member.icon %}
+                <i class="{{ member.icon }} text-black"></i>
+                {% else %}
+                <i class="fas fa-user-tie text-black"></i>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Должность с цветным бейджем -->
+        <div class="bg-primary-DEFAULT text-white text-sm px-4 py-1 rounded-full font-medium mb-2">
+            {{ member.position }}
+        </div>
+
+        <!-- Имя -->
+        <h4 class="text-xl font-bold text-gray-900 mb-1">{{ member.name }}</h4>
+
+        <!-- Описание или контакт -->
+        {% if member.contact %}
+        <p class="text-gray-500 text-sm font-mono">{{ member.contact }}</p>
+        {% endif %}
+
+        {% if member.description %}
+        <p class="text-gray-600 mt-2">{{ member.description }}</p>
+        {% endif %}
+    </div>
+</div>
+                {% endfor %}
+            {% else %}
+            <div class="col-span-full p-10 bg-white rounded-2xl shadow-md text-center">
+                <p class="text-gray-500">Информация о структуре федерации скоро появится</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Достижения Федерации -->
     </div>
 </section>
 
@@ -428,31 +482,7 @@
             {% endfor %}
         </div>
 
-        <div class="mt-16 text-center">
-            <h3 class="text-2xl font-bold text-black mb-8">Стать партнером</h3>
-            <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg" data-aos="fade-up">
-                <p class="text-gray-700 mb-6">Мы приглашаем организации и компании к сотрудничеству для развития спортивного программирования в Запорожской области. Став партнером ФСПЗО, вы получите:</p>
-                <ul class="text-left space-y-2 mb-6">
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-primary-DEFAULT mt-1 mr-2"></i>
-                        <span>Доступ к талантливым IT-специалистам и потенциальным сотрудникам</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-primary-DEFAULT mt-1 mr-2"></i>
-                        <span>Повышение узнаваемости бренда в IT-сообществе</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-primary-DEFAULT mt-1 mr-2"></i>
-                        <span>Участие в организации и проведении соревнований и мероприятий</span>
-                    </li>
-                    <li class="flex items-start">
-                        <i class="fas fa-check-circle text-primary-DEFAULT mt-1 mr-2"></i>
-                        <span>Возможность проведения специальных номинаций и конкурсов</span>
-                    </li>
-                </ul>
-                <a href="{{ url_for('contacts') }}" class="bg-primary-DEFAULT text-white px-8 py-3 rounded-lg font-bold hover:bg-primary-dark transition-colors inline-block">Связаться с нами</a>
-            </div>
-        </div>
+
     </div>
 </section>
 {% endblock %}

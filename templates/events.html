@@ -1,93 +1,18 @@
 {# templates/events.html #}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мероприятия - Федерация спортивного программирования ЗО</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            light: '#a78bfa', // Lighter Purple
-                            DEFAULT: '#8b5cf6', // Tailwind Indigo-500 (Purple)
-                            dark: '#6b46c1'      // Darker Purple
-                        }
-                    },
-                    fontFamily: {
-                        'code': ['"JetBrains Mono"', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body {
-            font-family: 'JetBrains Mono', monospace;
-            background-color: #f3f4f6;
-            color: #111827;
-        }
+{% extends 'base.html' %}
 
-        .nav-link:hover {
-            color: #a78bfa;
-        }
+{% block title %}Мероприятия - Федерация спортивного программирования ЗО{% endblock %}
 
-        .tab-active {
-            background-color: #8b5cf6;
-            color: white;
-        }
-    </style>
-</head>
-<body>
-    <!-- Навигация -->
-    <header class="fixed w-full bg-black z-40 backdrop-blur-sm bg-opacity-90">
-        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="{{ url_for('home') }}" class="text-white text-xl font-bold hover:scale-105 transition-transform flex items-center">
-                <span class="mr-2 text-primary-light"><i class="fas fa-laptop-code"></i></span>
-                ФСПЗО
-            </a>
-            <div class="hidden lg:flex space-x-8">
-                <a href="{{ url_for('home') }}#about" class="text-white nav-link transition-colors">О Федерации</a>
-                <a href="{{ url_for('home') }}#disciplines" class="text-white nav-link transition-colors">Дисциплины</a>
-                <a href="{{ url_for('events_list') }}" class="text-white nav-link transition-colors">Мероприятия</a>
-                <a href="{{ url_for('participants_list') }}" class="text-white nav-link transition-colors">Рейтинг</a>
-                <a href="{{ url_for('news_list') }}" class="text-white nav-link transition-colors">Новости</a>
-                <a href="{{ url_for('home') }}#partners" class="text-white nav-link transition-colors">Партнеры</a>
-                <a href="{{ url_for('contacts') }}" class="text-white nav-link transition-colors">Контакты</a>
-            </div>
-            <button id="mobile-menu-button" class="text-white text-2xl lg:hidden">
-                <i class="fas fa-bars"></i>
-            </button>
-        </nav>
-    </header>
+{% block extra_css %}
+<style>
+    .tab-active {
+        background-color: #8b5cf6;
+        color: white;
+    }
+</style>
+{% endblock %}
 
-    <!-- ЗОбильное меню -->
-    <div id="mobile-menu" class="fixed w-full h-screen bg-black z-50 hidden lg:hidden">
-        <div class="container mx-auto px-4 py-8">
-            <div class="flex justify-between items-center mb-8">
-                <a href="{{ url_for('home') }}" class="text-white text-xl font-bold">ФСПЗО</a>
-                <button id="close-menu" class="text-white text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="flex flex-col space-y-6">
-                <a href="{{ url_for('home') }}#about" class="text-white text-lg hover:text-primary-light transition-colors">О Федерации</a>
-                <a href="{{ url_for('home') }}#disciplines" class="text-white text-lg hover:text-primary-light transition-colors">Дисциплины</a>
-                <a href="{{ url_for('events_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Мероприятия</a>
-                <a href="{{ url_for('participants_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Рейтинг</a>
-                <a href="{{ url_for('news_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Новости</a>
-                <a href="{{ url_for('home') }}#partners" class="text-white text-lg hover:text-primary-light transition-colors">Партнеры</a>
-                <a href="{{ url_for('contacts') }}" class="text-white text-lg hover:text-primary-light transition-colors">Контакты</a>
-            </div>
-        </div>
-    </div>
-
+{% block content %}
     <!-- Заголовок страницы -->
     <section class="bg-gradient-to-r from-primary-dark to-primary pt-32 pb-20 text-white">
         <div class="container mx-auto px-4">
@@ -96,7 +21,7 @@
         </div>
     </section>
 
-    <!-- Основное содержиЗОе -->
+    <!-- Основное содержимое -->
     <section class="py-16">
         <div class="container mx-auto px-4">
             <!-- Табы -->
@@ -217,142 +142,48 @@
             </div>
         </div>
     </section>
+{% endblock %}
 
-    <!-- Футер -->
-    <footer class="bg-black text-white py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-4 grid-cols-1 gap-12">
-                <div class="space-y-4">
-                    <div class="flex items-center">
-                        <div class="text-4xl text-primary-light mr-3"><i class="fas fa-laptop-code"></i></div>
-                        <div>
-                            <h3 class="text-xl font-bold text-white">ФСПЗО</h3>
-                            <p class="text-gray-400 text-sm">Федерация спортивного программирования ЗО</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-300">Федерация спортивного программирования Запорожской области развивает и поддерживает талантливых программистов региона.</p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
-                            <span class="sr-only">Telegram</span>
-                            <i class="fab fa-telegram-plane"></i>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
-                            <span class="sr-only">VK</span>
-                            <i class="fab fa-vk"></i>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
-                            <span class="sr-only">GitHub</span>
-                            <i class="fab fa-github"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <h3 class="text-xl font-bold text-primary-light">Основное</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{{ url_for('home') }}#about" class="text-gray-300 hover:text-white transition-colors">О Федерации</a></li>
-                        <li><a href="{{ url_for('home') }}#disciplines" class="text-gray-300 hover:text-white transition-colors">Дисциплины</a></li>
-                        <li><a href="{{ url_for('events_list') }}" class="text-gray-300 hover:text-white transition-colors">Мероприятия</a></li>
-                        <li><a href="{{ url_for('news_list') }}" class="text-gray-300 hover:text-white transition-colors">Новости</a></li>
-                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Контакты</a></li>
-                    </ul>
-                </div>
-                <div class="space-y-4">
-                    <h3 class="text-xl font-bold text-primary-light">Для участников</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{{ url_for('events_list') }}" class="text-gray-300 hover:text-white transition-colors">Регистрация</a></li>
-                        <li><a href="{{ url_for('home') }}#calendar" class="text-gray-300 hover:text-white transition-colors">Календарь</a></li>
-                        <li><a href="{{ url_for('participants_list') }}" class="text-gray-300 hover:text-white transition-colors">Рейтинг</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Учебные материалы</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="space-y-4">
-                    <h3 class="text-xl font-bold text-primary-light">Сотрудничество</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{{ url_for('home') }}#partners" class="text-gray-300 hover:text-white transition-colors">Стать партнером</a></li>
-                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Спонсорство</a></li>
-                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Организаторам</a></li>
-                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Волонтерам</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-                <p class="mb-4">© {{ now.year }} Федерация спортивного программирования Запорожской области. Все права защищены.</p>
-                <div class="flex justify-center space-x-6 mb-4">
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Политика конфиденциальности</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Условия использования</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Правила соревнований</a>
-                </div>
-                <p class="text-sm">Разработано с <i class="fas fa-heart text-primary-light"></i> для развития спортивного программирования</p>
-            </div>
-        </div>
-    </footer>
+{% block extra_js %}
+<script>
+    // Переключение между табами
+    const tabUpcoming = document.getElementById('tab-upcoming');
+    const tabPast = document.getElementById('tab-past');
+    const upcomingEvents = document.getElementById('upcoming-events');
+    const pastEvents = document.getElementById('past-events');
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script>
-        // Инициализация AOS
-        AOS.init({
-            duration: 800,
-            offset: 100,
-            once: true
-        });
+    tabUpcoming.addEventListener('click', () => {
+        tabUpcoming.classList.add('tab-active');
+        tabUpcoming.classList.add('text-white');
+        tabUpcoming.classList.add('bg-primary-DEFAULT');
+        tabUpcoming.classList.remove('text-primary-DEFAULT');
+        tabUpcoming.classList.remove('bg-white');
 
-        // ЗОбильное меню
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const closeMenuButton = document.getElementById('close-menu');
-        const mobileMenu = document.getElementById('mobile-menu');
+        tabPast.classList.remove('tab-active');
+        tabPast.classList.remove('text-white');
+        tabPast.classList.remove('bg-primary-DEFAULT');
+        tabPast.classList.add('text-primary-DEFAULT');
+        tabPast.classList.add('bg-white');
 
-        if (mobileMenuButton) {
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.remove('hidden');
-            });
-        }
+        upcomingEvents.classList.remove('hidden');
+        pastEvents.classList.add('hidden');
+    });
 
-        if (closeMenuButton) {
-            closeMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.add('hidden');
-            });
-        }
+    tabPast.addEventListener('click', () => {
+        tabPast.classList.add('tab-active');
+        tabPast.classList.add('text-white');
+        tabPast.classList.add('bg-primary-DEFAULT');
+        tabPast.classList.remove('text-primary-DEFAULT');
+        tabPast.classList.remove('bg-white');
 
-        // Переключение между табами
-        const tabUpcoming = document.getElementById('tab-upcoming');
-        const tabPast = document.getElementById('tab-past');
-        const upcomingEvents = document.getElementById('upcoming-events');
-        const pastEvents = document.getElementById('past-events');
+        tabUpcoming.classList.remove('tab-active');
+        tabUpcoming.classList.remove('text-white');
+        tabUpcoming.classList.remove('bg-primary-DEFAULT');
+        tabUpcoming.classList.add('text-primary-DEFAULT');
+        tabUpcoming.classList.add('bg-white');
 
-        tabUpcoming.addEventListener('click', () => {
-            tabUpcoming.classList.add('tab-active');
-            tabUpcoming.classList.add('text-white');
-            tabUpcoming.classList.add('bg-primary-DEFAULT');
-            tabUpcoming.classList.remove('text-primary-DEFAULT');
-            tabUpcoming.classList.remove('bg-white');
-
-            tabPast.classList.remove('tab-active');
-            tabPast.classList.remove('text-white');
-            tabPast.classList.remove('bg-primary-DEFAULT');
-            tabPast.classList.add('text-primary-DEFAULT');
-            tabPast.classList.add('bg-white');
-
-            upcomingEvents.classList.remove('hidden');
-            pastEvents.classList.add('hidden');
-        });
-
-        tabPast.addEventListener('click', () => {
-            tabPast.classList.add('tab-active');
-            tabPast.classList.add('text-white');
-            tabPast.classList.add('bg-primary-DEFAULT');
-            tabPast.classList.remove('text-primary-DEFAULT');
-            tabPast.classList.remove('bg-white');
-
-            tabUpcoming.classList.remove('tab-active');
-            tabUpcoming.classList.remove('text-white');
-            tabUpcoming.classList.remove('bg-primary-DEFAULT');
-            tabUpcoming.classList.add('text-primary-DEFAULT');
-            tabUpcoming.classList.add('bg-white');
-
-            upcomingEvents.classList.add('hidden');
-            pastEvents.classList.remove('hidden');
-        });
-    </script>
-</body>
-</html>
+        upcomingEvents.classList.add('hidden');
+        pastEvents.classList.remove('hidden');
+    });
+</script>
+{% endblock %}

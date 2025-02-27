@@ -37,7 +37,8 @@
 <header class="fixed w-full bg-black z-40 backdrop-blur-sm bg-opacity-90">
     <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
         <a href="{{ url_for('home') }}" class="text-white text-xl font-bold hover:scale-105 transition-transform flex items-center">
-            <span class="mr-2 text-primary-light"><i class="fas fa-laptop-code"></i></span>
+            <img src="{{ url_for('static', filename='logo.svg') }}" alt="">
+            <span class="mr-2 text-primary-light"></span>
             ФСПЗО
         </a>
         <div class="hidden lg:flex space-x-8">

@@ -1,114 +1,11 @@
 {# templates/event_detail.html #}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ event.title }} | Федерация спортивного программирования ЗО</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% extends 'base.html' %}
+
+{% block title %}{{ event.title }} | Федерация спортивного программирования ЗО{% endblock %}
+
+{% block extra_css %}
     <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            light: '#a78bfa', // Lighter Purple
-                            DEFAULT: '#8b5cf6', // Tailwind Indigo-500 (Purple)
-                            dark: '#6b46c1'      // Darker Purple
-                        },
-                        'team-card-bg': '#f9f5ff', // Very Light Purple for Team Cards
-                        'team-card-border': '#e9d8fd', // Light Purple Border
-                        'code-bg': '#1e1e3f',     // Dark Purple Code Background
-                        'terminal-green': '#3FD2AF' // Terminal Green Color
-                    },
-                    fontFamily: {
-                        'code': ['"JetBrains Mono"', 'monospace']
-                    },
-                    animation: {
-                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        'typing': 'typing 3.5s steps(30, end), blink-caret .75s step-end infinite'
-                    },
-                    keyframes: {
-                        typing: {
-                            'from': { width: '0' },
-                            'to': { width: '100%' }
-                        },
-                        'blink-caret': {
-                            'from, to': { borderColor: 'transparent' },
-                            '50%': { borderColor: '#a78bfa' }
-                        }
-                    },
-                    backgroundImage: {
-                        'code-pattern': "url('{{ url_for('static', filename='img/code-bg.jpg') }}')",
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        body {
-            font-family: 'JetBrains Mono', monospace;
-            background-color: #f3f4f6; /* Very Light Gray Background, almost white */
-            color: #111827; /* Dark Gray Text, almost black */
-            scroll-behavior: smooth;
-        }
-        .team-card {
-            background-color: theme('colors.team-card-bg');
-            border: 1px solid theme('colors.team-card-border');
-        }
-        .team-card:hover {
-            transform: scale(1.05);
-            transition: transform 0.2s ease-in-out;
-        }
-        .nav-link:hover {
-            color: theme('colors.primary.light'); /* Light Purple Hover */
-        }
-
-        /* Code animation styles */
-        .code-animation {
-            position: relative;
-            overflow: hidden;
-            white-space: nowrap;
-            margin: 0 auto;
-            letter-spacing: 0.15em;
-            border-right: 2px solid theme('colors.primary.light');
-            animation: typing 3.5s steps(30, end), blink-caret .75s step-end infinite;
-        }
-
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
-        }
-
-        @keyframes blink-caret {
-            from, to { border-color: transparent }
-            50% { border-color: theme('colors.primary.light') }
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: theme('colors.primary.DEFAULT');
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: theme('colors.primary.dark');
-        }
-
         /* Specific styles for event details */
         .event-header {
             background: linear-gradient(to right, theme('colors.primary.dark'), theme('colors.primary.DEFAULT'));
@@ -117,65 +14,40 @@
         .event-meta-icon {
             color: theme('colors.primary.DEFAULT');
         }
+        .filter-btn:hover {
+          color: white !important;
+          background-color: #5b21b6 !important; /* purple-800 */
+        }
+
+        .filter-btn.active {
+          color: white;
+          background-color: #8b5cf6; /* purple-500 */
+        }
+
+        .filter-btn:not(.active) {
+          color: #8b5cf6;
+          background-color: white;
+        }
+        .register-btn-pulse {
+          animation: pulse 2s infinite;
+          box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+      }
+
+      @keyframes pulse {
+          0% {
+              box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+          }
+          70% {
+              box-shadow: 0 0 0 15px rgba(139, 92, 246, 0);
+          }
+          100% {
+              box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+          }
+      }
     </style>
-</head>
-<body>
-    <!-- Мобильное меню (отображается только на мобильных) -->
-    <div id="mobile-menu" class="fixed w-full h-screen bg-black z-50 hidden lg:hidden">
-        <div class="container mx-auto px-4 py-8">
-            <div class="flex justify-between items-center mb-8">
-                <a href="{{ url_for('home') }}" class="text-white text-xl font-bold">ФСПЗО</a>
-                <button id="close-menu" class="text-white text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="flex flex-col space-y-6">
-                <a href="{{ url_for('home') }}#about" class="text-white text-lg hover:text-primary-light transition-colors">О Федерации</a>
-                <a href="{{ url_for('home') }}#disciplines" class="text-white text-lg hover:text-primary-light transition-colors">Дисциплины</a>
-                <a href="{{ url_for('events_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Мероприятия</a>
-                <a href="{{ url_for('participants_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Рейтинг</a>
-                <a href="{{ url_for('news_list') }}" class="text-white text-lg hover:text-primary-light transition-colors">Новости</a>
-                <a href="{{ url_for('home') }}#partners" class="text-white text-lg hover:text-primary-light transition-colors">Партнеры</a>
-                <a href="{{ url_for('contacts') }}" class="text-white text-lg hover:text-primary-light transition-colors">Контакты</a>
-            </div>
-            <div class="mt-8 pt-8 border-t border-gray-800">
-                <div class="flex space-x-6 justify-center">
-                    <a href="#" class="text-white hover:text-primary-light transition-colors text-2xl">
-                        <i class="fab fa-telegram-plane"></i>
-                    </a>
-                    <a href="#" class="text-white hover:text-primary-light transition-colors text-2xl">
-                        <i class="fab fa-vk"></i>
-                    </a>
-                    <a href="#" class="text-white hover:text-primary-light transition-colors text-2xl">
-                        <i class="fab fa-github"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+{% endblock %}
 
-    <!-- Навигация -->
-    <header class="fixed w-full bg-black z-40 backdrop-blur-sm bg-opacity-90">
-        <nav class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="{{ url_for('home') }}" class="text-white text-xl font-bold hover:scale-105 transition-transform flex items-center">
-                <span class="mr-2 text-primary-light"><i class="fas fa-laptop-code"></i></span>
-                ФСПЗО
-            </a>
-            <div class="hidden lg:flex space-x-8">
-                <a href="{{ url_for('home') }}#about" class="text-white nav-link transition-colors">О Федерации</a>
-                <a href="{{ url_for('home') }}#disciplines" class="text-white nav-link transition-colors">Дисциплины</a>
-                <a href="{{ url_for('events_list') }}" class="text-white nav-link transition-colors">Мероприятия</a>
-                <a href="{{ url_for('participants_list') }}" class="text-white nav-link transition-colors">Рейтинг</a>
-                <a href="{{ url_for('news_list') }}" class="text-white nav-link transition-colors">Новости</a>
-                <a href="{{ url_for('home') }}#partners" class="text-white nav-link transition-colors">Партнеры</a>
-                <a href="{{ url_for('contacts') }}" class="text-white nav-link transition-colors">Контакты</a>
-            </div>
-            <button id="mobile-menu-button" class="text-white text-2xl lg:hidden">
-                <i class="fas fa-bars"></i>
-            </button>
-        </nav>
-    </header>
-
+{% block content %}
     <!-- Заголовок мероприятия -->
     <!-- Заголовок мероприятия с градиентным фоном -->
 <section class="bg-gradient-to-r from-primary-dark to-primary pt-32 pb-20 text-white">
@@ -559,83 +431,11 @@
         {% endif %}
     </div>
 </section>
+{% endblock %}
 
-    <!-- Футер -->
-    <footer class="bg-black text-white py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-4 grid-cols-1 gap-12">
-                <div class="space-y-4">
-                    <div class="flex items-center">
-                        <div class="text-4xl text-primary-light mr-3"><i class="fas fa-laptop-code"></i></div>
-                        <div>
-                            <h3 class="text-xl font-bold text-white">ФСПЗО</h3>
-                            <p class="text-gray-400 text-sm">Федерация спортивного программирования ЗО</p>
-                        </div>
-                    </div>
-                    <p class="text-gray-300">Федерация спортивного программирования Запорожской области развивает и поддерживает талантливых программистов региона.</p>
-                    <div class="flex space-x-4">
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
-                            <span class="sr-only">Telegram</span>
-                            <i class="fab fa-telegram-plane"></i>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
-                            <span class="sr-only">VK</span>
-                            <i class="fab fa-vk"></i>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
-                            <span class="sr-only">GitHub</span>
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="#" class="text-gray-300 hover:text-white transition-colors text-2xl">
-                            <span class="sr-only">YouTube</span>
-                            <i class="fab fa-youtube"></i>
-                        </a>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <h3 class="text-xl font-bold text-primary-light">Основное</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{{ url_for('home') }}#about" class="text-gray-300 hover:text-white transition-colors">О Федерации</a></li>
-                        <li><a href="{{ url_for('home') }}#disciplines" class="text-gray-300 hover:text-white transition-colors">Дисциплины</a></li>
-                        <li><a href="{{ url_for('events_list') }}" class="text-gray-300 hover:text-white transition-colors">Мероприятия</a></li>
-                        <li><a href="{{ url_for('news_list') }}" class="text-gray-300 hover:text-white transition-colors">Новости</a></li>
-                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Контакты</a></li>
-                    </ul>
-                </div>
-                <div class="space-y-4">
-                    <h3 class="text-xl font-bold text-primary-light">Для участников</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{{ url_for('events_list') }}" class="text-gray-300 hover:text-white transition-colors">Регистрация</a></li>
-                        <li><a href="{{ url_for('home') }}#calendar" class="text-gray-300 hover:text-white transition-colors">Календарь</a></li>
-                        <li><a href="{{ url_for('participants_list') }}" class="text-gray-300 hover:text-white transition-colors">Рейтинг</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Учебные материалы</a></li>
-                        <li><a href="#" class="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="space-y-4">
-                    <h3 class="text-xl font-bold text-primary-light">Сотрудничество</h3>
-                    <ul class="space-y-2">
-                        <li><a href="{{ url_for('home') }}#partners" class="text-gray-300 hover:text-white transition-colors">Стать партнером</a></li>
-                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Спонсорство</a></li>
-                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Организаторам</a></li>
-                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Волонтерам</a></li>
-                        <li><a href="{{ url_for('contacts') }}" class="text-gray-300 hover:text-white transition-colors">Вакансии</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-400">
-                <p class="mb-4">© {{ now.year }} Федерация спортивного программирования Запорожской области. Все права защищены.</p>
-                <div class="flex justify-center space-x-6 mb-4">
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Политика конфиденциальности</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Условия использования</a>
-                    <a href="#" class="text-gray-400 hover:text-white transition-colors">Правила соревнований</a>
-                </div>
-                <p class="text-sm">Разработано с <i class="fas fa-heart text-primary-light"></i> для развития спортивного программирования</p>
-            </div>
-        </div>
-    </footer>
-
+{% block extra_js %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Инициализация AOS
         AOS.init({
@@ -644,7 +444,7 @@
             once: true
         });
 
-        // Мобильное меню
+        // Мобильное меню (из base.html - header.html)
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const closeMenuButton = document.getElementById('close-menu');
         const mobileMenu = document.getElementById('mobile-menu');
@@ -668,8 +468,7 @@
             'albumLabel': "Изображение %1 из %2"
         });
     </script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
+    <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Фильтрация участников
         const filterButtons = document.querySelectorAll('.filter-btn');
@@ -746,37 +545,4 @@
         {% endif %}
     });
 </script>
-<style>
-  .filter-btn:hover {
-    color: white !important;
-    background-color: #5b21b6 !important; /* purple-800 */
-  }
-
-  .filter-btn.active {
-    color: white;
-    background-color: #8b5cf6; /* purple-500 */
-  }
-
-  .filter-btn:not(.active) {
-    color: #8b5cf6;
-    background-color: white;
-  }
-  .register-btn-pulse {
-    animation: pulse 2s infinite;
-    box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 15px rgba(139, 92, 246, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
-    }
-}
-</style>
-</body>
-</html>
+{% endblock %}

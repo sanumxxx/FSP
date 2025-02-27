@@ -23,12 +23,14 @@
                         primary: {
                             light: '#a78bfa', // Lighter Purple
                             DEFAULT: '#8b5cf6', // Tailwind Indigo-500 (Purple)
-                            dark: '#6b46c1'      // Darker Purple
+                            dark: '#6b46c1',    // Darker Purple
+                            darker: '#5b21b6'    // Even Darker Purple (for active states)
                         },
                         'team-card-bg': '#f9f5ff', // Very Light Purple for Team Cards
                         'team-card-border': '#e9d8fd', // Light Purple Border
                         'code-bg': '#1e1e3f',     // Dark Purple Code Background
-                        'terminal-green': '#3FD2AF' // Terminal Green Color
+                        'terminal-green': '#3FD2AF', // Terminal Green Color
+                        'active-purple': '#784ed6'  // Specific active color
                     },
                     fontFamily: {
                         'code': ['"JetBrains Mono"', 'monospace']
@@ -59,30 +61,92 @@
     <style>
         body {
             font-family: 'JetBrains Mono', monospace;
-            background-color: #f3f4f6; /* Very Light Gray Background, almost white */
-            color: #111827; /* Dark Gray Text, almost black */
+            background-color: #f1f5f9; /* Более заметный светло-серый фон (slate-100) */
+            color: #1e293b; /* Темно-серый текст (slate-800) */
             scroll-behavior: smooth;
         }
+
+        /* Карточки контента */
+        .content-card {
+            background-color: white;
+            border: 1px solid #e5e7eb; /* gray-200 - светло-серая граница */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+
+        /* Команды и участники */
         .team-card {
-            background-color: theme('colors.team-card-bg');
-            border: 1px solid theme('colors.team-card-border');
+            background-color: white;
+            border: 1px solid #e9d8fd; /* Светло-фиолетовая граница */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .team-card:hover {
             transform: scale(1.05);
             transition: transform 0.2s ease-in-out;
-        }
-        .nav-link:hover {
-            color: theme('colors.primary.light'); /* Light Purple Hover */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
-        /* Code animation styles */
+        /* Навигация */
+        .nav-link {
+            position: relative;
+            padding-bottom: 2px;
+        }
+        .nav-link:hover {
+            color: #a78bfa; /* Светло-фиолетовый при наведении */
+        }
+        .nav-link.active {
+            color: #8b5cf6; /* Фиолетовый для активного элемента */
+            font-weight: 600;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: #8b5cf6;
+        }
+
+        /* Вкладки и фильтры */
+        .category-tab, .filter-btn {
+            border: 1px solid #8b5cf6; /* Явная фиолетовая граница */
+            transition: all 0.2s ease;
+        }
+        .category-tab.active, .filter-btn.active {
+            background-color: #784ed6 !important; /* Указанный активный цвет */
+            color: white !important;
+            font-weight: 600;
+        }
+        .category-tab:not(.active), .filter-btn:not(.active) {
+            background-color: white !important;
+            color: #4b5563 !important; /* text-gray-600 - достаточно темный */
+        }
+
+        /* Таблицы */
+        table thead {
+            background-color: #784ed6; /* Фиолетовый фон для заголовков */
+        }
+        table thead th {
+            color: white !important; /* Белый текст для заголовков */
+            font-weight: 600;
+        }
+        table tbody tr:nth-child(even) {
+            background-color: #f8f7ff; /* Очень светлый фиолетовый для четных строк */
+        }
+        table tbody tr:hover {
+            background-color: #f3f0ff; /* Светло-фиолетовый при наведении */
+        }
+
+        /* Анимация кода */
         .code-animation {
             position: relative;
             overflow: hidden;
             white-space: nowrap;
             margin: 0 auto;
             letter-spacing: 0.15em;
-            border-right: 2px solid theme('colors.primary.light');
+            border-right: 2px solid #a78bfa;
             animation: typing 3.5s steps(30, end), blink-caret .75s step-end infinite;
         }
 
@@ -93,10 +157,56 @@
 
         @keyframes blink-caret {
             from, to { border-color: transparent }
-            50% { border-color: theme('colors.primary.light') }
+            50% { border-color: #a78bfa }
         }
 
-        /* Custom scrollbar */
+        /* Кнопки */
+        .btn-primary {
+            background-color: #8b5cf6;
+            color: white;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: #7c3aed; /* Более темный оттенок */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Формы и поля ввода */
+        input, textarea, select {
+            background-color: white;
+            border: 1px solid #d1d5db; /* gray-300 - явная, видимая граница */
+            color: #1f2937; /* gray-800 - темный текст */
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #8b5cf6; /* primary - фиолетовый */
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); /* Тень фокуса */
+        }
+
+        /* Пульсирующая кнопка регистрации */
+        .register-btn-pulse {
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(139, 92, 246, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+            }
+        }
+
+        /* Скроллбар */
         ::-webkit-scrollbar {
             width: 10px;
         }
@@ -106,46 +216,12 @@
         }
 
         ::-webkit-scrollbar-thumb {
-            background: theme('colors.primary.DEFAULT');
+            background: #8b5cf6;
             border-radius: 5px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: theme('colors.primary.dark');
-        }
-
-        /* Стили для пульсирующей кнопки регистрации */
-        .register-btn-pulse {
-            animation: pulse 2s infinite;
-            box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
-        }
-
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 15px rgba(255, 255, 255, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
-            }
-        }
-
-        /* Стили для фильтр-кнопок */
-        .filter-btn:hover {
-            color: white !important;
-            background-color: #5b21b6 !important; /* purple-800 */
-        }
-
-        .filter-btn.active {
-            color: white !important;
-            background-color: #8b5cf6 !important; /* purple-500 */
-        }
-
-        .filter-btn:not(.active) {
-            color: #8b5cf6 !important;
-            background-color: white !important;
+            background: #6b46c1;
         }
     </style>
 
@@ -170,6 +246,18 @@
                 duration: 800,
                 offset: 100,
                 once: true
+            });
+
+            // Активация текущего пункта меню на основе URL
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            navLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === currentPath ||
+                    (href !== '/' && currentPath.startsWith(href))) {
+                    link.classList.add('active');
+                }
             });
         });
     </script>
