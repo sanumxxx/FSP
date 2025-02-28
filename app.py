@@ -11,6 +11,7 @@ from flask import render_template
 from sqlalchemy import desc
 from datetime import datetime
 
+
 # Создаем экземпляр Flask-приложения
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -1611,6 +1612,16 @@ def gallery():
 def contacts():
     """Страница с контактной информацией"""
     return render_template('contacts.html')
+
+@app.route('/privacy')
+def privacy():
+    """Страница с контактной информацией"""
+    return render_template('privacy.html')
+
+@app.route('/terms')
+def terms():
+    """Страница с контактной информацией"""
+    return render_template('terms.html')
 
 # Инициализация базы данных с первым администратором
 @app.route('/admin/statistics')

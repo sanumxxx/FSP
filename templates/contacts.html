@@ -1,4 +1,4 @@
-{# templates/contacts.html #}
+{# templates/contacts.html - обновленная версия с новыми контактами #}
 {% extends 'base.html' %}
 
 {% block title %}Контакты - Федерация спортивного программирования ЗО{% endblock %}
@@ -37,40 +37,6 @@
     .social-icon:hover {
         background-color: #6b46c1 !important; /* Темнее при наведении */
         transform: translateY(-3px);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    /* Поля формы */
-    .form-label {
-        color: #374151 !important; /* Темно-серый */
-        font-weight: 500;
-    }
-
-    .form-input {
-        background-color: white !important;
-        border: 1px solid #d1d5db !important; /* gray-300 */
-        color: #1f2937 !important; /* gray-800 */
-        border-radius: 0.375rem;
-    }
-
-    .form-input:focus {
-        border-color: #8b5cf6 !important;
-        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2) !important;
-        outline: none;
-    }
-
-    /* Кнопка отправки */
-    .submit-button {
-        background-color: #784ed6 !important; /* Явный цвет */
-        color: white !important;
-        font-weight: bold !important;
-        padding: 0.75rem 1rem;
-        border-radius: 0.5rem;
-        transition: all 0.2s ease;
-    }
-
-    .submit-button:hover {
-        background-color: #6b46c1 !important;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
@@ -125,7 +91,7 @@
     <!-- Основное содержимое -->
     <section class="py-16">
         <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-2 gap-12">
+            <div class="grid md:grid-cols-1 gap-12">
                 <!-- Контактная информация -->
                 <div class="space-y-8" data-aos="fade-right">
                     <div class="bg-white rounded-lg shadow-lg p-8 space-y-6 border border-gray-200">
@@ -137,7 +103,17 @@
                             </div>
                             <div>
                                 <h3 class="text-lg contact-heading mb-1">Адрес</h3>
-                                <p class="contact-text">г. Красногорск, ул. Центральная, д. 10, офис 305</p>
+                                <p class="contact-text">272319, Российская Федерация. Запорожская обл., г. Мелитополь, ул. Ломоносова, д.271.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center contact-icon-bg">
+                                <div class="contact-icon"><i class="fas fa-user"></i></div>
+                            </div>
+                            <div>
+                                <h3 class="text-lg contact-heading mb-1">Букреев Дмитрий Александрович</h3>
+                                <p class="contact-text">Председатель регионального отделения Запорожской области</p>
                             </div>
                         </div>
 
@@ -147,7 +123,7 @@
                             </div>
                             <div>
                                 <h3 class="text-lg contact-heading mb-1">Телефон</h3>
-                                <p class="contact-text">+7 (495) 123-45-67</p>
+                                <p class="contact-text">+79900040775</p>
                             </div>
                         </div>
 
@@ -157,7 +133,7 @@
                             </div>
                             <div>
                                 <h3 class="text-lg contact-heading mb-1">Email</h3>
-                                <p class="contact-text">info@fspmo.ru</p>
+                                <p class="contact-text">directum@fsp-zo.ru</p>
                             </div>
                         </div>
 
@@ -181,40 +157,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Форма обратной связи -->
-                <div data-aos="fade-left">
-                    <div class="bg-white rounded-lg shadow-lg p-8 border border-gray-200">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-6">Обратная связь</h2>
-                        <form>
-                            <div class="grid md:grid-cols-2 gap-6 mb-6">
-                                <div>
-                                    <label for="name" class="block text-sm form-label mb-1">Имя</label>
-                                    <input type="text" id="name" name="name" class="w-full px-4 py-2 form-input" required>
-                                </div>
-                                <div>
-                                    <label for="email" class="block text-sm form-label mb-1">Email</label>
-                                    <input type="email" id="email" name="email" class="w-full px-4 py-2 form-input" required>
-                                </div>
-                            </div>
-                            <div class="mb-6">
-                                <label for="subject" class="block text-sm form-label mb-1">Тема</label>
-                                <input type="text" id="subject" name="subject" class="w-full px-4 py-2 form-input" required>
-                            </div>
-                            <div class="mb-6">
-                                <label for="message" class="block text-sm form-label mb-1">Сообщение</label>
-                                <textarea id="message" name="message" rows="5" class="w-full px-4 py-2 form-input" required></textarea>
-                            </div>
-                            <div class="flex items-center mb-6">
-                                <input type="checkbox" id="privacy" name="privacy" class="mr-2 h-4 w-4 accent-primary-DEFAULT" required>
-                                <label for="privacy" class="text-sm contact-text">Я согласен с <a href="#" class="text-primary-DEFAULT hover:underline font-medium">политикой конфиденциальности</a></label>
-                            </div>
-                            <button type="submit" class="w-full py-3 px-6 rounded-lg submit-button">
-                                Отправить сообщение
-                            </button>
-                        </form>
-                    </div>
-                </div>
             </div>
 
             <!-- Карта -->
@@ -234,16 +176,6 @@
 <script>
     // Инициализация форм и контактных элементов
     document.addEventListener('DOMContentLoaded', function() {
-        // Инициализация формы
-        const contactForm = document.querySelector('form');
-        if (contactForm) {
-            contactForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                // Здесь будет код для отправки формы
-                alert('Форма отправлена! В реальном приложении здесь будет AJAX запрос.');
-            });
-        }
-
         // Анимация для социальных иконок
         const socialIcons = document.querySelectorAll('.social-icon');
         socialIcons.forEach(icon => {
@@ -259,8 +191,8 @@
         ymaps.ready(initMap);
 
         function initMap() {
-            // Координаты офиса
-            const officeCoords = [46.845541, 35.371958];
+            // Координаты офиса в Мелитополе (ул. Ломоносова, 271)
+            const officeCoords = [46.876983, 35.373159];
 
             // Создание карты
             const myMap = new ymaps.Map("map", {
@@ -271,11 +203,11 @@
 
             // Создание метки
             const placemark = new ymaps.Placemark(officeCoords, {
-                balloonContentHeader: 'Федерация спортивного программирования',
+                balloonContentHeader: 'Федерация спортивного программирования ЗО',
                 balloonContentBody: '<div class="map-balloon">' +
-                                    '<div class="map-balloon-title">Федерация спортивного программирования</div>' +
-                                    '<div class="map-balloon-address">г. Красногорск, ул. Центральная, д. 10, офис 305</div>' +
-                                    '<div class="map-balloon-contacts">Телефон: +7 (495) 123-45-67<br>Email: info@fspmo.ru</div>' +
+                                    '<div class="map-balloon-title">Федерация спортивного программирования ЗО</div>' +
+                                    '<div class="map-balloon-address">272319, Российская Федерация. Запорожская обл., г. Мелитополь, ул. Ломоносова, д.271.</div>' +
+                                    '<div class="map-balloon-contacts">Телефон: +79900040775<br>Email: directum@fsp-zo.ru</div>' +
                                     '</div>'
             }, {
                 preset: 'islands#violetDotIcon', // Фиолетовая иконка

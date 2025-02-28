@@ -1,0 +1,283 @@
+{# templates/news_detail.html #}
+{% extends 'base.html' %}
+
+{% block title %}{{ news.title }} - Федерация спортивного программирования ЗО{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для содержимого новости */
+    .news-content {
+        line-height: 1.8;
+    }
+
+    .news-content h2 {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        color: #1f2937;
+    }
+
+    .news-content h3 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-top: 1.25rem;
+        margin-bottom: 0.75rem;
+        color: #1f2937;
+    }
+
+    .news-content p {
+        margin-bottom: 1rem;
+    }
+
+    .news-content ul, .news-content ol {
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .news-content ul li {
+        list-style-type: disc;
+        margin-bottom: 0.5rem;
+    }
+
+    .news-content ol li {
+        list-style-type: decimal;
+        margin-bottom: 0.5rem;
+    }
+
+    .news-content a {
+        color: #8b5cf6;
+        text-decoration: none;
+    }
+
+    .news-content a:hover {
+        text-decoration: underline;
+    }
+
+    .news-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .news-content blockquote {
+        border-left: 4px solid #8b5cf6;
+        padding-left: 1rem;
+        font-style: italic;
+        margin: 1rem 0;
+        color: #4b5563;
+    }
+
+    /* Стили для блока "Читайте также" */
+    .related-news-card {
+        transition: all 0.3s ease;
+    }
+
+    .related-news-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Стили для кнопок соцсетей */
+    .social-share-btn {
+        transition: all 0.2s ease;
+    }
+
+    .social-share-btn:hover {
+        transform: scale(1.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Заголовок страницы -->
+    <section class="bg-gradient-to-r from-primary-dark to-primary pt-32 pb-20 text-white">
+        <div class="container mx-auto px-4">
+            <!-- Хлебные крошки -->
+            <nav class="flex mb-6" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="{{ url_for('home') }}" class="inline-flex items-center text-sm font-medium text-white hover:text-primary-light">
+                            <i class="fas fa-home mr-2"></i>
+                            Главная
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                            <a href="{{ url_for('news_list') }}" class="text-sm font-medium text-white hover:text-primary-light">
+                                Новости
+                            </a>
+                        </div>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-gray-400 mx-2"></i>
+                            <span class="text-sm font-medium text-gray-200 truncate max-w-xs">{{ news.title }}</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+
+            <!-- Заголовок новости -->
+            <h1 class="text-3xl md:text-4xl font-bold mb-4 text-center" data-aos="fade-up">{{ news.title }}</h1>
+
+            <!-- Дата публикации -->
+            <div class="flex justify-center items-center mb-6" data-aos="fade-up" data-aos-delay="100">
+                <i class="far fa-calendar-alt mr-2"></i>
+                <span>{{ news.created_at.strftime('%d.%m.%Y') }}</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Основное содержимое -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="lg:flex">
+                    <!-- Основная колонка с контентом -->
+                    <div class="lg:w-3/4 p-6 md:p-8">
+                        {% if news.image %}
+                        <div class="mb-8" data-aos="fade-up">
+                            <img src="{{ url_for('static', filename=news.image) }}" alt="{{ news.title }}" class="w-full h-auto rounded-lg shadow-md">
+                        </div>
+                        {% endif %}
+
+                        <!-- Контент новости -->
+                        <div class="news-content prose max-w-none" data-aos="fade-up">
+                            {{ news.content|safe }}
+                        </div>
+
+                        <!-- Блок с социальными кнопками -->
+                        <div class="mt-10 pt-6 border-t border-gray-200">
+                            <h3 class="text-lg font-bold text-gray-700 mb-4">Поделиться новостью:</h3>
+                            <div class="flex space-x-4">
+                                <a href="#" class="social-share-btn w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center" title="Поделиться ВКонтакте">
+                                    <i class="fab fa-vk"></i>
+                                </a>
+                                <a href="#" class="social-share-btn w-10 h-10 rounded-full bg-blue-400 text-white flex items-center justify-center" title="Поделиться в Telegram">
+                                    <i class="fab fa-telegram-plane"></i>
+                                </a>
+                                <a href="#" class="social-share-btn w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center" title="Поделиться в WhatsApp">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                                <a href="#" class="social-share-btn w-10 h-10 rounded-full bg-gray-600 text-white flex items-center justify-center" title="Отправить по email">
+                                    <i class="far fa-envelope"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Боковая колонка для рекомендаций -->
+                    <div class="lg:w-1/4 bg-gray-50 p-6 md:p-8 border-l border-gray-200">
+                        <h3 class="text-xl font-bold text-gray-800 mb-6">Читайте также</h3>
+
+                        {% if related_news %}
+                            <div class="space-y-6">
+                                {% for related in related_news %}
+                                <a href="{{ url_for('news_detail', id=related.id) }}" class="block">
+                                    <div class="related-news-card bg-white rounded-lg shadow-sm p-4">
+                                        {% if related.image %}
+                                        <img src="{{ url_for('static', filename=related.image) }}" alt="{{ related.title }}" class="w-full h-32 object-cover rounded-md mb-4">
+                                        {% endif %}
+                                        <h4 class="font-bold text-gray-800 mb-2 line-clamp-2">{{ related.title }}</h4>
+                                        <div class="text-xs text-gray-500 flex items-center">
+                                            <i class="far fa-calendar-alt mr-1"></i>
+                                            {{ related.created_at.strftime('%d.%m.%Y') }}
+                                        </div>
+                                    </div>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-gray-500">Нет связанных новостей</p>
+                        {% endif %}
+
+                        <!-- Кнопка "Все новости" -->
+                        <div class="mt-8 text-center">
+                            <a href="{{ url_for('news_list') }}" class="inline-flex items-center text-primary-DEFAULT hover:text-primary-dark">
+                                <span>Все новости</span>
+                                <i class="fas fa-arrow-right ml-2"></i>
+                            </a>
+                        </div>
+
+                        <!-- Дополнительный блок с ближайшими мероприятиями -->
+                        <div class="mt-10 pt-6 border-t border-gray-200">
+                            <h3 class="text-xl font-bold text-gray-800 mb-6">Ближайшие мероприятия</h3>
+
+                            {% set upcoming_events = get_upcoming_events(2) if get_upcoming_events is defined else [] %}
+
+                            {% if upcoming_events %}
+                                <div class="space-y-4">
+                                    {% for event in upcoming_events %}
+                                    <a href="{{ url_for('event_detail', id=event.id) }}" class="block bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                                        <div class="text-sm text-gray-500 mb-1">{{ event.start_date.strftime('%d.%m.%Y') }}</div>
+                                        <h4 class="font-bold text-gray-800 mb-1">{{ event.title }}</h4>
+                                        <div class="flex items-center text-gray-600 text-xs">
+                                            <i class="fas fa-map-marker-alt mr-1"></i>
+                                            <span>{{ event.location }}</span>
+                                        </div>
+                                    </a>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="mt-4 text-center">
+                                    <a href="{{ url_for('events_list') }}" class="inline-flex items-center text-primary-DEFAULT hover:text-primary-dark">
+                                        <span>Календарь мероприятий</span>
+                                        <i class="fas fa-arrow-right ml-2"></i>
+                                    </a>
+                                </div>
+                            {% else %}
+                                <p class="text-gray-500">Нет предстоящих мероприятий</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Инициализация AOS
+    AOS.init({
+        duration: 800,
+        offset: 100,
+        once: true
+    });
+
+    // Обработка кнопок поделиться
+    document.addEventListener('DOMContentLoaded', function() {
+        const shareButtons = document.querySelectorAll('.social-share-btn');
+
+        shareButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // Получаем информацию для шаринга
+                const url = window.location.href;
+                const title = document.title;
+
+                // Определяем тип соцсети по иконке
+                const icon = this.querySelector('i');
+
+                if (icon.classList.contains('fa-vk')) {
+                    // ВКонтакте
+                    window.open(`https://vk.com/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`, 'vk-share', 'width=800,height=600');
+                } else if (icon.classList.contains('fa-telegram-plane')) {
+                    // Telegram
+                    window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`, 'telegram-share', 'width=800,height=600');
+                } else if (icon.classList.contains('fa-whatsapp')) {
+                    // WhatsApp
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(title + ' ' + url)}`, 'whatsapp-share', 'width=800,height=600');
+                } else if (icon.classList.contains('fa-envelope')) {
+                    // Email
+                    window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`;
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}`
