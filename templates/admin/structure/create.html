@@ -38,9 +38,43 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="icon" class="form-label">Иконка (FontAwesome)</label>
-                        <input type="text" class="form-control" id="icon" name="icon" placeholder="fas fa-user-tie">
-                        <div class="form-text">Название иконки из Font Awesome. Пример: fas fa-user-tie, fas fa-code, fas fa-chalkboard-teacher</div>
+                        <label for="icon" class="form-label">Иконка</label>
+                        <select class="form-select" id="icon" name="icon">
+                            <option value="">Выберите иконку</option>
+
+                            <optgroup label="Должности и роли">
+                                <option value="fas fa-user-tie" data-icon="fas fa-user-tie">Руководитель (fas fa-user-tie)</option>
+                                <option value="fas fa-chalkboard-teacher" data-icon="fas fa-chalkboard-teacher">Преподаватель (fas fa-chalkboard-teacher)</option>
+                                <option value="fas fa-user-graduate" data-icon="fas fa-user-graduate">Студент (fas fa-user-graduate)</option>
+                                <option value="fas fa-user-cog" data-icon="fas fa-user-cog">Администратор (fas fa-user-cog)</option>
+                                <option value="fas fa-code" data-icon="fas fa-code">Программист (fas fa-code)</option>
+                            </optgroup>
+
+                            <optgroup label="IT и технологии">
+                                <option value="fas fa-laptop-code" data-icon="fas fa-laptop-code">IT-специалист (fas fa-laptop-code)</option>
+                                <option value="fas fa-database" data-icon="fas fa-database">Базы данных (fas fa-database)</option>
+                                <option value="fas fa-network-wired" data-icon="fas fa-network-wired">Сети (fas fa-network-wired)</option>
+                                <option value="fas fa-mobile-alt" data-icon="fas fa-mobile-alt">Мобильная разработка (fas fa-mobile-alt)</option>
+                                <option value="fas fa-brain" data-icon="fas fa-brain">Искусственный интеллект (fas fa-brain)</option>
+                            </optgroup>
+
+                            <optgroup label="Соревнования и достижения">
+                                <option value="fas fa-trophy" data-icon="fas fa-trophy">Трофей (fas fa-trophy)</option>
+                                <option value="fas fa-medal" data-icon="fas fa-medal">Медаль (fas fa-medal)</option>
+                                <option value="fas fa-award" data-icon="fas fa-award">Награда (fas fa-award)</option>
+                                <option value="fas fa-flag-checkered" data-icon="fas fa-flag-checkered">Финиш (fas fa-flag-checkered)</option>
+                                <option value="fas fa-star" data-icon="fas fa-star">Звезда (fas fa-star)</option>
+                            </optgroup>
+
+                            <optgroup label="Другие">
+                                <option value="fas fa-project-diagram" data-icon="fas fa-project-diagram">Проект (fas fa-project-diagram)</option>
+                                <option value="fas fa-users" data-icon="fas fa-users">Команда (fas fa-users)</option>
+                                <option value="fas fa-user-shield" data-icon="fas fa-user-shield">Безопасность (fas fa-user-shield)</option>
+                                <option value="fas fa-lightbulb" data-icon="fas fa-lightbulb">Идея (fas fa-lightbulb)</option>
+                                <option value="fas fa-chart-line" data-icon="fas fa-chart-line">Аналитика (fas fa-chart-line)</option>
+                            </optgroup>
+                        </select>
+                        <div class="form-text">Выберите иконку, представляющую роль или специализацию</div>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -74,4 +108,51 @@
         </form>
     </div>
 </div>
+
+<style>
+    /* Стили для красивого выпадающего списка с иконками */
+    #icon option {
+        padding: 8px;
+    }
+</style>
+
+<script>
+    // Функция для инициализации Select2 с иконками
+    document.addEventListener('DOMContentLoaded', function() {
+        // Если есть jQuery и Select2, можно преобразовать селект в более красивый интерфейс
+        if (typeof $ !== 'undefined' && typeof $.fn.select2 !== 'undefined') {
+            $('#icon').select2({
+                templateResult: formatIconOption,
+                templateSelection: formatIconOption,
+                escapeMarkup: function(m) { return m; }
+            });
+        }
+
+        // Код для отображения выбранной иконки рядом с полем
+        const iconSelect = document.getElementById('icon');
+        const selectedIcon = document.createElement('div');
+        selectedIcon.id = 'selected-icon-preview';
+        selectedIcon.style.marginTop = '8px';
+        selectedIcon.style.fontSize = '24px';
+
+        iconSelect.parentNode.insertBefore(selectedIcon, iconSelect.nextSibling);
+
+        iconSelect.addEventListener('change', function() {
+            const selectedValue = this.value;
+            if (selectedValue) {
+                selectedIcon.innerHTML = `<i class="${selectedValue}" style="margin-right: 10px;"></i> ${selectedValue}`;
+            } else {
+                selectedIcon.innerHTML = '';
+            }
+        });
+    });
+
+    // Функция форматирования опций для Select2
+    function formatIconOption(option) {
+        if (!option.id) { return option.text; }
+        const icon = option.element.getAttribute('data-icon');
+        if (!icon) { return option.text; }
+        return `<i class="${icon}" style="margin-right: 10px;"></i> ${option.text}`;
+    }
+</script>
 {% endblock %}

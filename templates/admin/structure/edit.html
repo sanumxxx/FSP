@@ -38,9 +38,55 @@
             <div class="row mb-3">
                 <div class="col-md-6">
                     <div class="mb-3">
-                        <label for="icon" class="form-label">Иконка (FontAwesome)</label>
-                        <input type="text" class="form-control" id="icon" name="icon" value="{{ member.icon }}" placeholder="fas fa-user-tie">
-                        <div class="form-text">Название иконки из Font Awesome. Пример: fas fa-user-tie, fas fa-code, fas fa-chalkboard-teacher</div>
+                        <label for="icon" class="form-label">Иконка</label>
+                        <select class="form-select" id="icon" name="icon">
+                            <option value="">Выберите иконку</option>
+
+                            <optgroup label="Должности и роли">
+                                <option value="fas fa-user-tie" data-icon="fas fa-user-tie" {% if member.icon == 'fas fa-user-tie' %}selected{% endif %}>Руководитель (fas fa-user-tie)</option>
+                                <option value="fas fa-chalkboard-teacher" data-icon="fas fa-chalkboard-teacher" {% if member.icon == 'fas fa-chalkboard-teacher' %}selected{% endif %}>Преподаватель (fas fa-chalkboard-teacher)</option>
+                                <option value="fas fa-user-graduate" data-icon="fas fa-user-graduate" {% if member.icon == 'fas fa-user-graduate' %}selected{% endif %}>Студент (fas fa-user-graduate)</option>
+                                <option value="fas fa-user-cog" data-icon="fas fa-user-cog" {% if member.icon == 'fas fa-user-cog' %}selected{% endif %}>Администратор (fas fa-user-cog)</option>
+                                <option value="fas fa-code" data-icon="fas fa-code" {% if member.icon == 'fas fa-code' %}selected{% endif %}>Программист (fas fa-code)</option>
+                            </optgroup>
+
+                            <optgroup label="IT и технологии">
+                                <option value="fas fa-laptop-code" data-icon="fas fa-laptop-code" {% if member.icon == 'fas fa-laptop-code' %}selected{% endif %}>IT-специалист (fas fa-laptop-code)</option>
+                                <option value="fas fa-database" data-icon="fas fa-database" {% if member.icon == 'fas fa-database' %}selected{% endif %}>Базы данных (fas fa-database)</option>
+                                <option value="fas fa-network-wired" data-icon="fas fa-network-wired" {% if member.icon == 'fas fa-network-wired' %}selected{% endif %}>Сети (fas fa-network-wired)</option>
+                                <option value="fas fa-mobile-alt" data-icon="fas fa-mobile-alt" {% if member.icon == 'fas fa-mobile-alt' %}selected{% endif %}>Мобильная разработка (fas fa-mobile-alt)</option>
+                                <option value="fas fa-brain" data-icon="fas fa-brain" {% if member.icon == 'fas fa-brain' %}selected{% endif %}>Искусственный интеллект (fas fa-brain)</option>
+                            </optgroup>
+
+                            <optgroup label="Соревнования и достижения">
+                                <option value="fas fa-trophy" data-icon="fas fa-trophy" {% if member.icon == 'fas fa-trophy' %}selected{% endif %}>Трофей (fas fa-trophy)</option>
+                                <option value="fas fa-medal" data-icon="fas fa-medal" {% if member.icon == 'fas fa-medal' %}selected{% endif %}>Медаль (fas fa-medal)</option>
+                                <option value="fas fa-award" data-icon="fas fa-award" {% if member.icon == 'fas fa-award' %}selected{% endif %}>Награда (fas fa-award)</option>
+                                <option value="fas fa-flag-checkered" data-icon="fas fa-flag-checkered" {% if member.icon == 'fas fa-flag-checkered' %}selected{% endif %}>Финиш (fas fa-flag-checkered)</option>
+                                <option value="fas fa-star" data-icon="fas fa-star" {% if member.icon == 'fas fa-star' %}selected{% endif %}>Звезда (fas fa-star)</option>
+                            </optgroup>
+
+                            <optgroup label="Другие">
+                                <option value="fas fa-project-diagram" data-icon="fas fa-project-diagram" {% if member.icon == 'fas fa-project-diagram' %}selected{% endif %}>Проект (fas fa-project-diagram)</option>
+                                <option value="fas fa-users" data-icon="fas fa-users" {% if member.icon == 'fas fa-users' %}selected{% endif %}>Команда (fas fa-users)</option>
+                                <option value="fas fa-user-shield" data-icon="fas fa-user-shield" {% if member.icon == 'fas fa-user-shield' %}selected{% endif %}>Безопасность (fas fa-user-shield)</option>
+                                <option value="fas fa-lightbulb" data-icon="fas fa-lightbulb" {% if member.icon == 'fas fa-lightbulb' %}selected{% endif %}>Идея (fas fa-lightbulb)</option>
+                                <option value="fas fa-chart-line" data-icon="fas fa-chart-line" {% if member.icon == 'fas fa-chart-line' %}selected{% endif %}>Аналитика (fas fa-chart-line)</option>
+                            </optgroup>
+
+                            <!-- Опция для кастомной иконки, если текущая не найдена в списке -->
+                            {% if member.icon and member.icon not in [
+                                'fas fa-user-tie', 'fas fa-chalkboard-teacher', 'fas fa-user-graduate', 'fas fa-user-cog', 'fas fa-code',
+                                'fas fa-laptop-code', 'fas fa-database', 'fas fa-network-wired', 'fas fa-mobile-alt', 'fas fa-brain',
+                                'fas fa-trophy', 'fas fa-medal', 'fas fa-award', 'fas fa-flag-checkered', 'fas fa-star',
+                                'fas fa-project-diagram', 'fas fa-users', 'fas fa-user-shield', 'fas fa-lightbulb', 'fas fa-chart-line'
+                            ] %}
+                            <optgroup label="Текущая иконка">
+                                <option value="{{ member.icon }}" data-icon="{{ member.icon }}" selected>Текущая ({{ member.icon }})</option>
+                            </optgroup>
+                            {% endif %}
+                        </select>
+                        <div class="form-text">Выберите иконку, представляющую роль или специализацию</div>
                     </div>
                 </div>
                 <div class="col-md-6">
@@ -79,4 +125,66 @@
         </form>
     </div>
 </div>
+
+<style>
+    /* Стили для красивого выпадающего списка с иконками */
+    #icon option {
+        padding: 8px;
+    }
+
+    /* Стили для предпросмотра */
+    #selected-icon-preview {
+        padding: 8px;
+        border-radius: 4px;
+        margin-top: 8px;
+        background-color: #f8f9fa;
+        display: inline-block;
+    }
+</style>
+
+<script>
+    // Функция для инициализации Select2 с иконками
+    document.addEventListener('DOMContentLoaded', function() {
+        // Если есть jQuery и Select2, можно преобразовать селект в более красивый интерфейс
+        if (typeof $ !== 'undefined' && typeof $.fn.select2 !== 'undefined') {
+            $('#icon').select2({
+                templateResult: formatIconOption,
+                templateSelection: formatIconOption,
+                escapeMarkup: function(m) { return m; }
+            });
+        }
+
+        // Код для отображения выбранной иконки рядом с полем
+        const iconSelect = document.getElementById('icon');
+        const selectedIcon = document.createElement('div');
+        selectedIcon.id = 'selected-icon-preview';
+        selectedIcon.style.fontSize = '24px';
+
+        iconSelect.parentNode.insertBefore(selectedIcon, iconSelect.nextSibling);
+
+        // Показываем текущую иконку при загрузке страницы
+        const currentIcon = iconSelect.value;
+        if (currentIcon) {
+            selectedIcon.innerHTML = `<i class="${currentIcon}" style="margin-right: 10px;"></i> ${currentIcon}`;
+        }
+
+        // Обновляем при изменении выбора
+        iconSelect.addEventListener('change', function() {
+            const selectedValue = this.value;
+            if (selectedValue) {
+                selectedIcon.innerHTML = `<i class="${selectedValue}" style="margin-right: 10px;"></i> ${selectedValue}`;
+            } else {
+                selectedIcon.innerHTML = '';
+            }
+        });
+    });
+
+    // Функция форматирования опций для Select2
+    function formatIconOption(option) {
+        if (!option.id) { return option.text; }
+        const icon = option.element.getAttribute('data-icon');
+        if (!icon) { return option.text; }
+        return `<i class="${icon}" style="margin-right: 10px;"></i> ${option.text}`;
+    }
+</script>
 {% endblock %}

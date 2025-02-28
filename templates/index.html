@@ -177,116 +177,346 @@
     </div>
 </section>
 
-<!-- О Федерации - полностью переработанный раздел -->
-<!-- О Федерации - с исправленными элементами -->
-<section id="about" class="py-20 bg-gray-50">
+<!-- Обновленный раздел "О Федерации" с креативными элементами -->
+<!-- Обновленный раздел "О Федерации" с фокусом на информацию о федерации -->
+<section id="about" class="py-20 bg-gradient-to-br from-gray-50 to-gray-100">
     <div class="container mx-auto px-4">
-        <h2 class="text-3xl text-center font-bold mb-12" data-aos="fade-up">О Федерации</h2>
+        <div class="flex flex-col items-center justify-center mb-16">
+            <h2 class="text-4xl font-bold mb-4 text-center relative" data-aos="fade-up">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-700 to-indigo-500">
+                    О Федерации
+                </span>
+                <div class="absolute w-16 h-1 bg-gradient-to-r from-purple-500 to-indigo-500 bottom-0 left-1/2 transform -translate-x-1/2 mt-2"></div>
+            </h2>
+            <p class="text-xl text-gray-600 max-w-3xl text-center" data-aos="fade-up" data-aos-delay="100">
+                Создаем экосистему для развития талантов и инновационного мышления в IT
+            </p>
+        </div>
 
-        <!-- Основная информация -->
-        <div class="bg-white rounded-2xl shadow-lg p-8 mb-12" data-aos="fade-up">
-            <div class="grid md:grid-cols-2 gap-10 items-center">
-                <div class="space-y-6">
-                    <h3 class="text-2xl font-bold text-primary-DEFAULT">Наша миссия</h3>
-                    <p class="text-lg leading-relaxed">Федерация спортивного программирования Запорожской области объединяет профессионалов и энтузиастов в области IT для развития интеллектуального потенциала региона.</p>
-                    <p class="text-lg leading-relaxed">Мы создаем эффективную систему подготовки талантливых программистов, способных достойно представлять Запорожскую область на соревнованиях российского и международного уровня.</p>
+        <!-- Информация о федерации -->
+        <div class="mb-24 bg-white rounded-2xl shadow-xl overflow-hidden" data-aos="fade-up">
+            <div class="grid lg:grid-cols-2 gap-0">
+                <div class="p-10 lg:p-12">
+                    <h3 class="text-3xl font-bold text-gray-800 mb-6">О нас</h3>
+                    <div class="prose prose-lg max-w-none">
+                        <p>Федерация спортивного программирования Запорожской области — это сообщество профессионалов и энтузиастов в сфере информационных технологий, объединенных общей целью — развитием интеллектуального потенциала региона через соревновательное программирование.</p>
+                        <p>Мы создаем инфраструктуру для обучения, тренировок и участия в соревнованиях по программированию всех уровней — от начинающих до профессионалов, от школьников до опытных разработчиков.</p>
+                    </div>
 
-                    <div class="flex space-x-4 pt-6">
-                        <a href="{{ url_for('events_list') }}" class="bg-primary-DEFAULT hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-bold transition-colors inline-flex items-center">
-                            <i class="fas fa-trophy mr-2"></i>
-                            Соревнования
-                        </a>
-                        <!-- Исправлена кнопка "Связаться" - убран hover эффект для фона -->
-                        <a href="{{ url_for('contacts') }}" class="bg-white border-2 border-primary-DEFAULT text-primary-DEFAULT hover:text-primary-dark px-8 py-3 rounded-lg font-bold transition-colors inline-flex items-center">
-                            <i class="fas fa-envelope mr-2"></i>
-                            Связаться
-                        </a>
+                    <div class="mt-8">
+                        <h4 class="text-xl font-semibold text-gray-800 mb-6">Направления деятельности</h4>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 mr-4">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-gray-700 mb-1">Образование</h5>
+                                    <p class="text-gray-600 text-sm">Учебные программы, курсы и мастер-классы для всех уровней подготовки</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 mr-4">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-gray-700 mb-1">Соревнования</h5>
+                                    <p class="text-gray-600 text-sm">Организация турниров и чемпионатов различного уровня сложности</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 mr-4">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-gray-700 mb-1">Сообщество</h5>
+                                    <p class="text-gray-600 text-sm">Формирование активного IT-комьюнити в регионе</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 rounded-full bg-indigo-100 flex-shrink-0 flex items-center justify-center text-indigo-600 mr-4">
+                                    <i class="fas fa-handshake"></i>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-gray-700 mb-1">Партнерство</h5>
+                                    <p class="text-gray-600 text-sm">Сотрудничество с образовательными учреждениями и IT-компаниями</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6">
-                    <div class="bg-primary-light bg-opacity-10 p-6 rounded-xl flex flex-col items-center justify-center text-center">
-                        <div class="text-4xl text-primary-DEFAULT mb-3"><i class="fas fa-users"></i></div>
-                        <h4 class="text-lg font-bold mb-1">Сообщество</h4>
-                        <p class="text-gray-600">Развиваем IT-сообщество региона</p>
+                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 p-10 lg:p-12 text-white flex flex-col justify-center">
+                    <div class="mb-8">
+                        <h4 class="text-2xl font-bold mb-6">Наша миссия</h4>
+                        <blockquote class="border-l-4 border-white pl-4 italic">
+                            "Создать эффективную систему подготовки талантливых программистов, способных достойно представлять Запорожскую область на соревнованиях российского и международного уровня"
+                        </blockquote>
                     </div>
-                    <div class="bg-primary-light bg-opacity-10 p-6 rounded-xl flex flex-col items-center justify-center text-center">
-                        <div class="text-4xl text-primary-DEFAULT mb-3"><i class="fas fa-laptop-code"></i></div>
-                        <h4 class="text-lg font-bold mb-1">Обучение</h4>
-                        <p class="text-gray-600">Проводим тренинги и воркшопы</p>
-                    </div>
-                    <div class="bg-primary-light bg-opacity-10 p-6 rounded-xl flex flex-col items-center justify-center text-center">
-                        <div class="text-4xl text-primary-DEFAULT mb-3"><i class="fas fa-medal"></i></div>
-                        <h4 class="text-lg font-bold mb-1">Соревнования</h4>
-                        <p class="text-gray-600">Организуем турниры всех уровней</p>
-                    </div>
-                    <div class="bg-primary-light bg-opacity-10 p-6 rounded-xl flex flex-col items-center justify-center text-center">
-                        <div class="text-4xl text-primary-DEFAULT mb-3"><i class="fas fa-handshake"></i></div>
-                        <h4 class="text-lg font-bold mb-1">Партнерство</h4>
-                        <p class="text-gray-600">Сотрудничаем с IT-компаниями</p>
+
+                    <h4 class="text-2xl font-bold mb-6">Преимущества участия</h4>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-indigo-200 mt-1 mr-3"></i>
+                            <span>Развитие алгоритмического мышления и навыков программирования</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-indigo-200 mt-1 mr-3"></i>
+                            <span>Участие в престижных соревнованиях российского и международного уровня</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-indigo-200 mt-1 mr-3"></i>
+                            <span>Нетворкинг и общение с единомышленниками и профессионалами отрасли</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-indigo-200 mt-1 mr-3"></i>
+                            <span>Возможности для стажировок и трудоустройства в ведущие IT-компании</span>
+                        </li>
+                    </ul>
+
+                    <div class="mt-8">
+                        <a href="{{ url_for('events_list') }}" class="bg-white text-indigo-600 hover:bg-indigo-50 px-8 py-3 rounded-lg font-bold transition-colors inline-flex items-center">
+                            <i class="fas fa-trophy mr-2"></i>
+                            Принять участие в соревнованиях
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Структура федерации -->
-        <h3 class="text-2xl font-bold text-center mb-8" data-aos="fade-up">Структура федерации</h3>
+        <!-- Технологический стек и навыки -->
+        <div class="mb-24 bg-white rounded-2xl shadow-xl overflow-hidden" data-aos="fade-up">
+            <div class="p-10">
+                <h3 class="text-3xl font-bold text-gray-800 mb-10 text-center">Навыки и технологии</h3>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {% if federation_structure %}
-                {% for member in federation_structure %}
-                <!-- Исправленная карточка участника с черной иконкой -->
-<div class="bg-white rounded-2xl shadow-md overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-    <div class="p-6 flex flex-col items-center text-center">
-        <!-- Фото с цветной рамкой -->
-        <div class="mb-4 relative inline-block">
-            {% if member.photo %}
-            <div class="w-36 h-36 rounded-full border-4 border-primary-light overflow-hidden">
-                <img src="{{ url_for('static', filename=member.photo) }}" alt="{{ member.name }}" class="w-full h-full object-cover">
-            </div>
-            {% else %}
-            <div class="w-36 h-36 rounded-full border-4 border-primary-light bg-gray-100 flex items-center justify-center">
-                <span class="text-5xl font-bold text-primary-DEFAULT">{{ member.name[0] | upper }}</span>
-            </div>
-            {% endif %}
+                <div class="grid lg:grid-cols-3 gap-10 mb-8">
+                    <!-- Алгоритмы и структуры данных -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 shadow-md">
+                        <div class="bg-white rounded-lg p-4 shadow-md transform -rotate-3 mb-6">
+                            <pre class="text-xs text-indigo-600 overflow-x-auto font-mono">
+function quickSort(arr) {
+  if (arr.length <= 1) {
+    return arr;
+  }
 
-            <!-- Квадратная иконка должности с ЧЕРНЫМ цветом иконки -->
-            <div class="absolute bottom-0 right-0 w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-md border border-gray-200">
-                {% if member.icon %}
-                <i class="{{ member.icon }} text-black"></i>
+  const pivot = arr[0];
+  const left = [];
+  const right = [];
+
+  for (let i = 1; i < arr.length; i++) {
+    if (arr[i] < pivot) {
+      left.push(arr[i]);
+    } else {
+      right.push(arr[i]);
+    }
+  }
+
+  return [...quickSort(left), pivot, ...quickSort(right)];
+}</pre>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-800 mb-4">Алгоритмы и структуры данных</h4>
+                        <ul class="space-y-2">
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                <span>Сортировки и поиск</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                <span>Графы и деревья</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                <span>Динамическое программирование</span>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                <span>Жадные алгоритмы</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Языки программирования -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 shadow-md">
+                        <div class="grid grid-cols-4 gap-4 mb-6">
+                            <div class="bg-white p-2 rounded-lg shadow-md flex items-center justify-center transform hover:scale-110 transition-transform">
+                                <i class="fab fa-python text-3xl text-blue-500"></i>
+                            </div>
+                            <div class="bg-white p-2 rounded-lg shadow-md flex items-center justify-center transform hover:scale-110 transition-transform">
+                                <i class="fab fa-java text-3xl text-red-500"></i>
+                            </div>
+                            <div class="bg-white p-2 rounded-lg shadow-md flex items-center justify-center transform hover:scale-110 transition-transform">
+                                <i class="fab fa-js text-3xl text-yellow-500"></i>
+                            </div>
+                            <div class="bg-white p-2 rounded-lg shadow-md flex items-center justify-center transform hover:scale-110 transition-transform">
+                                <span class="text-2xl font-bold text-blue-600">C++</span>
+                            </div>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-800 mb-4">Языки программирования</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-blue-500 h-2.5 rounded-full" style="width: 95%"></div>
+                                </div>
+                                <span class="ml-2 text-sm">C++</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-blue-500 h-2.5 rounded-full" style="width: 85%"></div>
+                                </div>
+                                <span class="ml-2 text-sm">Python</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-blue-500 h-2.5 rounded-full" style="width: 75%"></div>
+                                </div>
+                                <span class="ml-2 text-sm">Java</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-blue-500 h-2.5 rounded-full" style="width: 65%"></div>
+                                </div>
+                                <span class="ml-2 text-sm">JavaScript</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Соревновательные платформы -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-6 shadow-md">
+                        <div class="bg-white rounded-lg p-4 shadow-md flex justify-between items-center mb-6">
+                            <div class="space-y-3">
+                                <div class="h-2 bg-indigo-200 rounded w-24"></div>
+                                <div class="h-2 bg-indigo-200 rounded w-16"></div>
+                                <div class="h-2 bg-indigo-200 rounded w-20"></div>
+                            </div>
+                            <div class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Accepted</div>
+                        </div>
+                        <h4 class="text-xl font-bold text-gray-800 mb-4">Соревновательные платформы</h4>
+                        <div class="space-y-3">
+                            <a href="#" class="flex items-center p-2 bg-white rounded hover:bg-gray-50 transition-colors">
+                                <div class="w-8 h-8 bg-red-100 rounded mr-3 flex items-center justify-center">
+                                    <span class="font-bold text-red-600 text-xs">CF</span>
+                                </div>
+                                <span>Codeforces</span>
+                            </a>
+                            <a href="#" class="flex items-center p-2 bg-white rounded hover:bg-gray-50 transition-colors">
+                                <div class="w-8 h-8 bg-orange-100 rounded mr-3 flex items-center justify-center">
+                                    <span class="font-bold text-orange-600 text-xs">LC</span>
+                                </div>
+                                <span>LeetCode</span>
+                            </a>
+                            <a href="#" class="flex items-center p-2 bg-white rounded hover:bg-gray-50 transition-colors">
+                                <div class="w-8 h-8 bg-blue-100 rounded mr-3 flex items-center justify-center">
+                                    <span class="font-bold text-blue-600 text-xs">TC</span>
+                                </div>
+                                <span>Topcoder</span>
+                            </a>
+                            <a href="#" class="flex items-center p-2 bg-white rounded hover:bg-gray-50 transition-colors">
+                                <div class="w-8 h-8 bg-yellow-100 rounded mr-3 flex items-center justify-center text-yellow-600">
+                                    <i class="fas fa-gamepad text-sm"></i>
+                                </div>
+                                <span>Яндекс.Контест</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center">
+                    <a href="{{ url_for('events_list') }}" class="bg-[#8b5cf6] hover:bg-[#6b46c1] text-white px-8 py-3 rounded-lg font-bold transition-colors inline-flex items-center">
+                        <i class="fas fa-code mr-2"></i>
+                        Начать обучение
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Команда с современным дизайном -->
+        <div class="mb-16" data-aos="fade-up">
+            <h3 class="text-3xl font-bold text-center text-gray-800 mb-12">Руководство Федерации</h3>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {% if federation_structure %}
+                    {% for member in federation_structure %}
+                    <div class="bg-white rounded-xl shadow-lg p-6 relative group transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                        <!-- Фото участника с современным дизайном -->
+                        <div class="flex flex-col items-center">
+                            <div class="mb-6 relative">
+                                {% if member.photo %}
+                                <div class="w-28 h-28 rounded-full overflow-hidden shadow-md border-2 border-white group-hover:border-indigo-300 transition-all duration-300">
+                                    <img src="{{ url_for('static', filename=member.photo) }}" alt="{{ member.name }}" class="w-full h-full object-cover">
+                                </div>
+                                {% else %}
+                                <div class="w-28 h-28 rounded-full overflow-hidden shadow-md border-2 border-white group-hover:border-indigo-300 transition-all duration-300 bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
+                                    <span class="text-3xl font-bold text-indigo-500">{{ member.name[0] | upper }}</span>
+                                </div>
+                                {% endif %}
+
+                                <!-- Иконка в углу фото -->
+                                <div class="absolute bottom-0 right-0 w-8 h-8 bg-white rounded shadow-md flex items-center justify-center border border-gray-100">
+                                    {% if member.icon %}
+                                    <i class="{{ member.icon }} text-[#6b46c1]"></i>
+                                    {% else %}
+                                    <i class="fas fa-user-tie text-[#6b46c1]"></i>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Информация об участнике -->
+                            <h4 class="text-xl font-bold text-gray-800 mb-1 text-center">{{ member.name }}</h4>
+
+                            <div class="px-3 py-1 mb-3 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full text-sm font-semibold text-[#6b46c1]">
+                                {{ member.position }}
+                            </div>
+
+                            {% if member.contact %}
+                            <p class="text-gray-500 text-sm mb-4 font-mono">{{ member.contact }}</p>
+                            {% endif %}
+
+                            {% if member.description %}
+                            <p class="text-gray-600 text-center">{{ member.description }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
                 {% else %}
-                <i class="fas fa-user-tie text-black"></i>
+                <div class="col-span-full bg-white rounded-xl shadow-md p-10 text-center">
+                    <p class="text-gray-500">Информация о структуре федерации скоро появится</p>
+                </div>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Должность с цветным бейджем -->
-        <div class="bg-primary-DEFAULT text-white text-sm px-4 py-1 rounded-full font-medium mb-2">
-            {{ member.position }}
-        </div>
-
-        <!-- Имя -->
-        <h4 class="text-xl font-bold text-gray-900 mb-1">{{ member.name }}</h4>
-
-        <!-- Описание или контакт -->
-        {% if member.contact %}
-        <p class="text-gray-500 text-sm font-mono">{{ member.contact }}</p>
-        {% endif %}
-
-        {% if member.description %}
-        <p class="text-gray-600 mt-2">{{ member.description }}</p>
-        {% endif %}
-    </div>
-</div>
-                {% endfor %}
-            {% else %}
-            <div class="col-span-full p-10 bg-white rounded-2xl shadow-md text-center">
-                <p class="text-gray-500">Информация о структуре федерации скоро появится</p>
+        <!-- Призыв к действию -->
+        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-xl overflow-hidden text-white" data-aos="fade-up">
+            <div class="p-10 grid md:grid-cols-2 gap-10 items-center">
+                <div>
+                    <h3 class="text-3xl font-bold mb-6">Присоединяйся к нам!</h3>
+                    <p class="mb-6 text-indigo-100">Стань частью сообщества спортивных программистов, развивай навыки и строй успешную карьеру в IT вместе с нами.</p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="{{ url_for('events_list') }}" class="bg-white text-indigo-600 hover:bg-indigo-50 px-8 py-3 rounded-lg font-bold transition-colors inline-flex items-center">
+                            <i class="fas fa-trophy mr-2"></i>
+                            Принять участие в соревнованиях
+                        </a>
+                        <a href="{{ url_for('contacts') }}" class="bg-transparent border-2 border-white text-white hover:bg-white/10 px-8 py-3 rounded-lg font-bold transition-colors inline-flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Связаться с нами
+                        </a>
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="relative">
+                        <div class="w-56 h-56 bg-white/10 rounded-full absolute top-0 right-0 animate-pulse-slow"></div>
+                        <div class="w-40 h-40 bg-white/10 rounded-full absolute bottom-10 left-10 animate-pulse-slow" style="animation-delay: 1s;"></div>
+                        <div class="bg-white/20 rounded-xl p-6 transform rotate-3 backdrop-blur-sm">
+                            <div class="text-center">
+                                <i class="fas fa-code text-6xl mb-4"></i>
+                                <h4 class="text-xl font-bold mb-2">Стань частью команды</h4>
+                                <p class="text-sm text-indigo-100">Развивайся вместе с нами!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            {% endif %}
         </div>
-
-        <!-- Достижения Федерации -->
     </div>
 </section>
 

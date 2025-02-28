@@ -75,10 +75,40 @@
     }
 
     /* Карта */
-    .map-placeholder {
-        background-color: #e5e7eb !important; /* gray-200 */
-        color: #4b5563 !important; /* gray-600 - темнее для лучшего контраста */
-        font-weight: 500;
+    .map-container {
+        height: 400px;
+        width: 100%;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    /* Стили для контейнера и балуна карты */
+    [class*="ymaps-2"][class*="-ground-pane"] {
+        filter: grayscale(0.6) brightness(0.95);
+    }
+
+    /* Стили для балуна */
+    .map-balloon {
+        padding: 15px;
+        max-width: 250px;
+    }
+
+    .map-balloon-title {
+        color: #6b46c1;
+        font-weight: bold;
+        margin-bottom: 8px;
+        font-size: 16px;
+    }
+
+    .map-balloon-address {
+        color: #4b5563;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+
+    .map-balloon-contacts {
+        color: #6b7280;
+        font-size: 13px;
     }
 </style>
 {% endblock %}
@@ -146,16 +176,7 @@
                         <h2 class="text-2xl font-bold text-gray-900 mb-6">Социальные сети</h2>
                         <div class="flex space-x-4">
                             <a href="#" class="w-12 h-12 rounded-full flex items-center justify-center social-icon">
-                                <i class="fab fa-telegram-plane"></i>
-                            </a>
-                            <a href="#" class="w-12 h-12 rounded-full flex items-center justify-center social-icon">
                                 <i class="fab fa-vk"></i>
-                            </a>
-                            <a href="#" class="w-12 h-12 rounded-full flex items-center justify-center social-icon">
-                                <i class="fab fa-github"></i>
-                            </a>
-                            <a href="#" class="w-12 h-12 rounded-full flex items-center justify-center social-icon">
-                                <i class="fab fa-youtube"></i>
                             </a>
                         </div>
                     </div>
@@ -200,9 +221,7 @@
             <div class="mt-16" data-aos="fade-up">
                 <h2 class="text-2xl font-bold text-gray-900 mb-6 text-center">Наше местоположение</h2>
                 <div class="bg-white rounded-lg shadow-lg p-4 border border-gray-200">
-                    <div class="h-96 rounded-lg flex items-center justify-center map-placeholder">
-                        <p>Здесь будет карта с расположением офиса федерации</p>
-                    </div>
+                    <div id="map" class="map-container"></div>
                 </div>
             </div>
         </div>
@@ -210,6 +229,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Подключение API Яндекс Карт -->
+<script src="https://api-maps.yandex.ru/2.1/?apikey=ваш_API_ключ&lang=ru_RU" type="text/javascript"></script>
 <script>
     // Инициализация форм и контактных элементов
     document.addEventListener('DOMContentLoaded', function() {
@@ -233,6 +254,43 @@
                 this.classList.remove('animate-pulse');
             });
         });
+
+        // Инициализация Яндекс Карты
+        ymaps.ready(initMap);
+
+        function initMap() {
+            // Координаты офиса
+            const officeCoords = [46.845541, 35.371958];
+
+            // Создание карты
+            const myMap = new ymaps.Map("map", {
+                center: officeCoords,
+                zoom: 15,
+                controls: ['zoomControl', 'geolocationControl']
+            });
+
+            // Создание метки
+            const placemark = new ymaps.Placemark(officeCoords, {
+                balloonContentHeader: 'Федерация спортивного программирования',
+                balloonContentBody: '<div class="map-balloon">' +
+                                    '<div class="map-balloon-title">Федерация спортивного программирования</div>' +
+                                    '<div class="map-balloon-address">г. Красногорск, ул. Центральная, д. 10, офис 305</div>' +
+                                    '<div class="map-balloon-contacts">Телефон: +7 (495) 123-45-67<br>Email: info@fspmo.ru</div>' +
+                                    '</div>'
+            }, {
+                preset: 'islands#violetDotIcon', // Фиолетовая иконка
+                iconColor: '#8b5cf6' // Цвет иконки в соответствии с дизайном сайта
+            });
+
+            // Добавление метки на карту
+            myMap.geoObjects.add(placemark);
+
+            // Настройки отображения карты
+            myMap.behaviors.disable('scrollZoom'); // Отключаем скролл карты колесиком мыши
+
+            // Делаем балун открытым по умолчанию при загрузке
+            placemark.balloon.open();
+        }
     });
 </script>
 {% endblock %}
