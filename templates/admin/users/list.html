@@ -1,0 +1,697 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}Пользователи | Админ-панель ФСПЗО{% endblock %}
+{% block page_title %}Управление пользователями{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* iOS-style User Card */
+    .user-card {
+        border-radius: var(--ios-radius-md);
+        box-shadow: var(--ios-card-shadow);
+        overflow: hidden;
+        background-color: white;
+        transition: all 0.3s ease;
+        margin-bottom: 16px;
+    }
+
+    .user-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .user-card-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: var(--ios-blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        flex-shrink: 0;
+    }
+
+    .user-info {
+        margin-left: 16px;
+        flex-grow: 1;
+    }
+
+    .role-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .role-superadmin {
+        background-color: rgba(255, 45, 85, 0.1);
+        color: #FF2D55; /* iOS pink */
+    }
+
+    .role-admin {
+        background-color: rgba(0, 122, 255, 0.1);
+        color: var(--ios-blue);
+    }
+
+    .role-editor {
+        background-color: rgba(52, 199, 89, 0.1);
+        color: var(--ios-green);
+    }
+
+    .user-card-body {
+        padding: 16px 20px;
+    }
+
+    .user-card-footer {
+        padding: 12px 20px;
+        background-color: rgba(0, 0, 0, 0.02);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .user-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        margin-bottom: 8px;
+    }
+
+    .user-meta-item {
+        display: flex;
+        align-items: center;
+    }
+
+    .user-meta-item i {
+        color: var(--ios-gray);
+        margin-right: 8px;
+        font-size: 0.9rem;
+    }
+
+    .user-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    /* Search and filter bar */
+    .search-filter-bar {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .search-box {
+        flex-grow: 1;
+        position: relative;
+    }
+
+    .search-box input {
+        padding-left: 36px;
+        border-radius: var(--ios-radius-md);
+        background-color: white;
+        border: none;
+        box-shadow: var(--ios-card-shadow);
+        height: 44px;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--ios-gray);
+    }
+
+    .filter-dropdown .dropdown-menu {
+        border: none;
+        border-radius: var(--ios-radius-sm);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 8px;
+    }
+
+    .filter-dropdown .dropdown-item {
+        border-radius: var(--ios-radius-sm);
+        padding: 8px 12px;
+    }
+
+    .filter-dropdown .dropdown-item:hover {
+        background-color: rgba(0, 122, 255, 0.05);
+    }
+
+    .filter-dropdown .dropdown-item.active {
+        background-color: var(--ios-blue);
+        color: white;
+    }
+
+    /* Table view toggle */
+    .view-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: var(--ios-radius-md);
+        background-color: white;
+        border: none;
+        box-shadow: var(--ios-card-shadow);
+        color: var(--ios-gray);
+        transition: all 0.2s ease;
+    }
+
+    .view-toggle-btn.active {
+        color: var(--ios-blue);
+        background-color: rgba(0, 122, 255, 0.1);
+    }
+
+    .view-toggle-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Table view */
+    .table-view {
+        display: none;
+    }
+
+    .table-view.active {
+        display: block;
+    }
+
+    .user-table {
+        border-radius: var(--ios-radius-md);
+        overflow: hidden;
+        box-shadow: var(--ios-card-shadow);
+    }
+
+    .user-table th {
+        background-color: rgba(0, 0, 0, 0.02);
+        font-weight: 600;
+        color: var(--ios-dark-gray);
+        padding: 12px 16px;
+        border: none;
+    }
+
+    .user-table td {
+        padding: 16px;
+        vertical-align: middle;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* Card view */
+    .card-view {
+        display: none;
+    }
+
+    .card-view.active {
+        display: block;
+    }
+
+    /* Add User Button */
+    .add-user-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 56px;
+        height: 56px;
+        border-radius: 28px;
+        background-color: var(--ios-blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        transition: all 0.3s ease;
+        border: none;
+        z-index: 10;
+    }
+
+    .add-user-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
+    }
+
+    .add-user-btn i {
+        font-size: 1.5rem;
+    }
+
+    /* User Status */
+    .status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+    }
+
+    .status-active {
+        background-color: var(--ios-green);
+    }
+
+    .status-inactive {
+        background-color: var(--ios-gray);
+    }
+
+    /* No users message */
+    .no-users-message {
+        text-align: center;
+        padding: 60px 0;
+    }
+
+    .no-users-message i {
+        font-size: 3rem;
+        color: var(--ios-gray);
+        margin-bottom: 16px;
+    }
+
+    .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        background-color: rgba(0, 122, 255, 0.1);
+        border-radius: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+    }
+
+    .empty-state-icon i {
+        font-size: 2rem;
+        color: var(--ios-blue);
+    }
+
+    /* Copy link button */
+    .copy-link-btn {
+        background: none;
+        border: none;
+        color: var(--ios-blue);
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+    }
+
+    .copy-link-btn:hover {
+        background-color: rgba(0, 122, 255, 0.1);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .user-meta {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .search-filter-bar {
+            flex-direction: column;
+        }
+
+        .user-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .user-card-header .d-flex {
+            margin-bottom: 8px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-filter-bar">
+    <div class="search-box">
+        <i class="bi bi-search"></i>
+        <input type="text" class="form-control" id="userSearch" placeholder="Поиск пользователей по имени или email...">
+    </div>
+
+    <div class="dropdown filter-dropdown">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="roleFilter" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-funnel me-2"></i>Роль
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="roleFilter">
+            <li><a class="dropdown-item active" href="#" data-role="all">Все роли</a></li>
+            <li><a class="dropdown-item" href="#" data-role="superadmin">Суперадминистраторы</a></li>
+            <li><a class="dropdown-item" href="#" data-role="admin">Администраторы</a></li>
+            <li><a class="dropdown-item" href="#" data-role="editor">Редакторы</a></li>
+        </ul>
+    </div>
+
+    <div class="view-toggles d-flex gap-2">
+        <button class="view-toggle-btn active" id="cardViewBtn" title="Карточки">
+            <i class="bi bi-grid"></i>
+        </button>
+        <button class="view-toggle-btn" id="tableViewBtn" title="Таблица">
+            <i class="bi bi-list-ul"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Card View -->
+<div class="card-view active">
+    <div class="row" id="usersCardContainer">
+        <!-- Пример карточки пользователя - будет заполнено динамически или из бэкенда -->
+        {% if users %}
+            {% for user in users %}
+            <div class="col-lg-6" data-role="{{ user.role }}">
+                <div class="user-card">
+                    <div class="user-card-header">
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar">
+                                {{ user.username[0].upper() }}
+                            </div>
+                            <div class="user-info">
+                                <h5 class="mb-0">{{ user.username }}</h5>
+                                <div class="text-muted small">{{ user.email }}</div>
+                            </div>
+                        </div>
+                        <span class="role-badge role-{{ user.role }}">{{ user.role }}</span>
+                    </div>
+                    <div class="user-card-body">
+                        <div class="user-meta">
+                            <div class="user-meta-item">
+                                <i class="bi bi-calendar"></i>
+                                <span class="small">Создан: {{ user.created_at.strftime('%d.%m.%Y') }}</span>
+                            </div>
+                            <div class="user-meta-item">
+                                <i class="bi bi-clock"></i>
+                                <span class="small">Последний вход: {{ user.last_login.strftime('%d.%m.%Y %H:%M') if user.last_login else 'Никогда' }}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="status-indicator status-{{ 'active' if user.is_active else 'inactive' }}"></span>
+                            <span class="small">{{ 'Активен' if user.is_active else 'Неактивен' }}</span>
+                        </div>
+                    </div>
+                    <div class="user-card-footer">
+                        <div class="text-muted small">ID: {{ user.id }}</div>
+                        <div class="user-actions">
+                            <a href="{{ url_for('admin_users_edit', id=user.id) }}" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if current_user.id != user.id %}
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}" title="Удалить">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            {% endif %}
+                            <button type="button" class="copy-link-btn" data-user-email="{{ user.email }}" title="Скопировать email">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for user deletion -->
+            <div class="modal fade" id="deleteUserModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteUserModalLabel{{ user.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteUserModalLabel{{ user.id }}">Подтверждение удаления</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                <strong>Внимание!</strong> Вы собираетесь удалить пользователя <strong>{{ user.username }}</strong>
+                            </div>
+                            <p>Это действие нельзя будет отменить. Вы уверены?</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Отмена</button>
+                            <form action="{{ url_for('admin_users_delete', id=user.id) }}" method="post">
+                                <button type="submit" class="btn btn-danger">Удалить</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="no-users-message">
+                    <div class="empty-state-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <h4 class="mb-3">Нет пользователей</h4>
+                    <p class="text-muted mb-4">Добавьте первого пользователя, нажав на кнопку ниже</p>
+                    <a href="{{ url_for('admin_users_create') }}" class="btn btn-primary">
+                        <i class="bi bi-person-plus me-2"></i>Добавить пользователя
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Table View -->
+<div class="table-view">
+    {% if users %}
+    <div class="user-table-container">
+        <table class="table user-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Пользователь</th>
+                    <th>Email</th>
+                    <th>Роль</th>
+                    <th>Статус</th>
+                    <th>Создан</th>
+                    <th>Последний вход</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr data-role="{{ user.role }}">
+                    <td>{{ user.id }}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="user-avatar me-2" style="width: 32px; height: 32px; font-size: 0.9rem;">
+                                {{ user.username[0].upper() }}
+                            </div>
+                            <span>{{ user.username }}</span>
+                        </div>
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <span class="role-badge role-{{ user.role }}">{{ user.role }}</span>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <span class="status-indicator status-{{ 'active' if user.is_active else 'inactive' }}"></span>
+                            <span>{{ 'Активен' if user.is_active else 'Неактивен' }}</span>
+                        </div>
+                    </td>
+                    <td>{{ user.created_at.strftime('%d.%m.%Y') }}</td>
+                    <td>{{ user.last_login.strftime('%d.%m.%Y %H:%M') if user.last_login else 'Никогда' }}</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('admin_users_edit', id=user.id) }}" class="btn btn-sm btn-outline-primary" title="Редактировать">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% if current_user.id != user.id %}
+                            <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal{{ user.id }}" title="Удалить">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="no-users-message">
+        <div class="empty-state-icon">
+            <i class="bi bi-people"></i>
+        </div>
+        <h4 class="mb-3">Нет пользователей</h4>
+        <p class="text-muted mb-4">Добавьте первого пользователя, нажав на кнопку ниже</p>
+        <a href="{{ url_for('admin_users_create') }}" class="btn btn-primary">
+            <i class="bi bi-person-plus me-2"></i>Добавить пользователя
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Floating add button -->
+<a href="{{ url_for('admin_users_create') }}" class="add-user-btn">
+    <i class="bi bi-plus-lg"></i>
+</a>
+
+<!-- Toast notifications -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="copyToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-clipboard-check me-2 text-success"></i>
+            <strong class="me-auto">Копирование</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Email успешно скопирован в буфер обмена.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // View toggle
+        const cardViewBtn = document.getElementById('cardViewBtn');
+        const tableViewBtn = document.getElementById('tableViewBtn');
+        const cardView = document.querySelector('.card-view');
+        const tableView = document.querySelector('.table-view');
+
+        cardViewBtn.addEventListener('click', function() {
+            cardViewBtn.classList.add('active');
+            tableViewBtn.classList.remove('active');
+            cardView.classList.add('active');
+            tableView.classList.remove('active');
+        });
+
+        tableViewBtn.addEventListener('click', function() {
+            tableViewBtn.classList.add('active');
+            cardViewBtn.classList.remove('active');
+            tableView.classList.add('active');
+            cardView.classList.remove('active');
+        });
+
+        // Search functionality
+        const userSearch = document.getElementById('userSearch');
+
+        userSearch.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            filterUsers(searchTerm, getCurrentRoleFilter());
+        });
+
+        // Role filter
+        const roleFilters = document.querySelectorAll('[data-role]');
+
+        roleFilters.forEach(filter => {
+            filter.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // Update active state
+                roleFilters.forEach(f => f.classList.remove('active'));
+                this.classList.add('active');
+
+                const role = this.getAttribute('data-role');
+                const searchTerm = userSearch.value.toLowerCase();
+
+                filterUsers(searchTerm, role);
+            });
+        });
+
+        // Copy email functionality
+        const copyButtons = document.querySelectorAll('.copy-link-btn');
+        const copyToast = new bootstrap.Toast(document.getElementById('copyToast'));
+
+        copyButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const email = this.getAttribute('data-user-email');
+
+                navigator.clipboard.writeText(email).then(() => {
+                    copyToast.show();
+                });
+            });
+        });
+
+        // Filter helpers
+        function getCurrentRoleFilter() {
+            const activeFilter = document.querySelector('.dropdown-item.active[data-role]');
+            return activeFilter ? activeFilter.getAttribute('data-role') : 'all';
+        }
+
+        function filterUsers(searchTerm, role) {
+            // Card view filtering
+            const userCards = document.querySelectorAll('#usersCardContainer > div[data-role]');
+
+            userCards.forEach(card => {
+                const username = card.querySelector('.user-info h5').textContent.toLowerCase();
+                const email = card.querySelector('.user-info .text-muted').textContent.toLowerCase();
+                const userRole = card.getAttribute('data-role');
+
+                const matchesSearch = username.includes(searchTerm) || email.includes(searchTerm);
+                const matchesRole = role === 'all' || userRole === role;
+
+                if (matchesSearch && matchesRole) {
+                    card.style.display = '';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            // Table view filtering
+            const tableRows = document.querySelectorAll('.user-table tbody tr[data-role]');
+
+            tableRows.forEach(row => {
+                const username = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                const email = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                const userRole = row.getAttribute('data-role');
+
+                const matchesSearch = username.includes(searchTerm) || email.includes(searchTerm);
+                const matchesRole = role === 'all' || userRole === role;
+
+                if (matchesSearch && matchesRole) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Check if any users are visible after filtering
+            const visibleCards = Array.from(userCards).filter(card => card.style.display !== 'none');
+            const visibleRows = Array.from(tableRows).filter(row => row.style.display !== 'none');
+
+            const noUsersCardMessage = document.querySelector('#usersCardContainer .no-users-message');
+            const noUsersTableMessage = document.querySelector('.user-table-container + .no-users-message');
+
+            // If we have the empty state elements
+            if (noUsersCardMessage) {
+                if (visibleCards.length === 0 && userCards.length > 0) {
+                    // No matches found
+                    noUsersCardMessage.style.display = 'block';
+                    noUsersCardMessage.innerHTML = `
+                        <div class="empty-state-icon">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        <h4 class="mb-3">Ничего не найдено</h4>
+                        <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                    `;
+                } else {
+                    noUsersCardMessage.style.display = 'none';
+                }
+            }
+
+            if (noUsersTableMessage) {
+                if (visibleRows.length === 0 && tableRows.length > 0) {
+                    // No matches found
+                    noUsersTableMessage.style.display = 'block';
+                    noUsersTableMessage.innerHTML = `
+                        <div class="empty-state-icon">
+                            <i class="bi bi-search"></i>
+                        </div>
+                        <h4 class="mb-3">Ничего не найдено</h4>
+                        <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                    `;
+                } else {
+                    noUsersTableMessage.style.display = 'none';
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

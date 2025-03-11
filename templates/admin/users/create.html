@@ -1,0 +1,740 @@
+<!-- templates/admin/users/create.html -->
+{% extends 'admin/base.html' %}
+
+{% block title %}Создание пользователя | Админ-панель ФСПЗО{% endblock %}
+{% block page_title %}Создание пользователя{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* iOS-style Form Card */
+    .form-card {
+        background-color: white;
+        border-radius: var(--ios-radius-md);
+        box-shadow: var(--ios-card-shadow);
+        overflow: hidden;
+    }
+
+    .form-card-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .form-card-body {
+        padding: 24px;
+    }
+
+    .form-card-footer {
+        padding: 16px 24px;
+        background-color: rgba(0, 0, 0, 0.02);
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    /* iOS-style form controls */
+    .form-label {
+        color: var(--ios-dark-gray);
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    .form-control, .form-select {
+        border-radius: var(--ios-radius-md);
+        padding: 12px 16px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background-color: rgba(242, 242, 247, 0.6);
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--ios-blue);
+        box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+    }
+
+    .form-text {
+        font-size: 0.8rem;
+        color: var(--ios-gray);
+        margin-top: 6px;
+    }
+
+    /* iOS-style switch */
+    .form-switch {
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
+        margin-bottom: 16px;
+    }
+
+    .form-switch .form-check-input {
+        width: 50px;
+        height: 30px;
+        margin-top: 0;
+        margin-right: 12px;
+        background-image: none;
+        background-color: #e9e9eb;
+        border: none;
+        cursor: pointer;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: var(--ios-green);
+    }
+
+    .form-switch .form-check-input:focus {
+        box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.2);
+        border: none;
+    }
+
+    .form-switch .form-check-input:before {
+        content: '';
+        position: absolute;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background-color: white;
+        top: 2px;
+        left: 2px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+    }
+
+    .form-switch .form-check-input:checked:before {
+        transform: translateX(20px);
+    }
+
+    /* Password strength meter */
+    .password-strength-meter {
+        height: 4px;
+        margin-top: 12px;
+        border-radius: 2px;
+        transition: all 0.2s ease;
+        background-color: #e9e9eb;
+        overflow: hidden;
+    }
+
+    .password-strength-meter-bar {
+        height: 100%;
+        width: 0;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .password-strength-text {
+        font-size: 0.75rem;
+        margin-top: 4px;
+        transition: all 0.2s ease;
+    }
+
+    /* Password show/hide */
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--ios-gray);
+        cursor: pointer;
+        padding: 8px;
+    }
+
+    .password-toggle:focus, .password-toggle:active {
+        outline: none;
+    }
+
+    /* Password generator */
+    .password-generator {
+        padding: 16px;
+        border-radius: var(--ios-radius-md);
+        background-color: rgba(0, 122, 255, 0.05);
+        margin-top: 16px;
+    }
+
+    .password-generator-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .password-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .password-option-check {
+        display: flex;
+        align-items: center;
+    }
+
+    .password-option-check input[type="checkbox"] {
+        margin-right: 6px;
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .length-slider {
+        width: 100%;
+        margin-top: 8px;
+    }
+
+    .generated-password {
+        padding: 8px 12px;
+        background-color: white;
+        border-radius: var(--ios-radius-sm);
+        font-family: monospace;
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* Role selection */
+    .role-selection {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .role-option {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: var(--ios-radius-md);
+        padding: 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .role-option:hover {
+        border-color: var(--ios-blue);
+        background-color: rgba(0, 122, 255, 0.05);
+    }
+
+    .role-option.active {
+        border-color: var(--ios-blue);
+        background-color: rgba(0, 122, 255, 0.1);
+    }
+
+    .role-option i {
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .role-option.active i {
+        color: var(--ios-blue);
+    }
+
+    .role-option-superadmin i {
+        color: #FF2D55;
+    }
+
+    .role-option-admin i {
+        color: var(--ios-blue);
+    }
+
+    .role-option-editor i {
+        color: var(--ios-green);
+    }
+
+    .role-option.active.role-option-superadmin {
+        border-color: #FF2D55;
+        background-color: rgba(255, 45, 85, 0.1);
+    }
+
+    .role-option.active.role-option-admin {
+        border-color: var(--ios-blue);
+        background-color: rgba(0, 122, 255, 0.1);
+    }
+
+    .role-option.active.role-option-editor {
+        border-color: var(--ios-green);
+        background-color: rgba(52, 199, 89, 0.1);
+    }
+
+    /* Form group spacing */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    /* Form inputs with icon */
+    .input-with-icon {
+        position: relative;
+    }
+
+    .input-with-icon .form-control {
+        padding-left: 40px;
+    }
+
+    .input-with-icon i {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--ios-gray);
+    }
+
+    /* Create user avatar */
+    .user-avatar-preview {
+        width: 80px;
+        height: 80px;
+        border-radius: 40px;
+        background-color: var(--ios-blue);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 500;
+        margin: 0 auto 16px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .role-selection {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="form-card">
+            <div class="form-card-header">
+                <h4 class="mb-0">Создание нового пользователя</h4>
+            </div>
+            <form id="createUserForm" action="{{ url_for('admin_users_create') }}" method="post">
+                <div class="form-card-body">
+                    <!-- Предпросмотр аватара -->
+                    <div class="text-center mb-4">
+                        <div class="user-avatar-preview" id="avatarPreview">A</div>
+                    </div>
+
+                    <!-- Основная информация -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="username" class="form-label">Имя пользователя</label>
+                                <div class="input-with-icon">
+                                    <i class="bi bi-person"></i>
+                                    <input type="text" class="form-control" id="username" name="username" required autocomplete="off" autofocus>
+                                </div>
+                                <div class="form-text">Будет использоваться для входа в систему.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email" class="form-label">Email</label>
+                                <div class="input-with-icon">
+                                    <i class="bi bi-envelope"></i>
+                                    <input type="email" class="form-control" id="email" name="email" required autocomplete="off">
+                                </div>
+                                <div class="form-text">Используется для восстановления пароля.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Выбор роли -->
+                    <div class="form-group">
+                        <label class="form-label">Роль пользователя</label>
+                        <div class="role-selection">
+                            <div class="role-option role-option-editor" data-role="editor">
+                                <i class="bi bi-pencil-square"></i>
+                                <div class="fw-medium">Редактор</div>
+                                <div class="small text-muted">Базовые права</div>
+                                <input type="radio" name="role" value="editor" class="visually-hidden" checked>
+                            </div>
+                            <div class="role-option role-option-admin" data-role="admin">
+                                <i class="bi bi-shield-lock"></i>
+                                <div class="fw-medium">Администратор</div>
+                                <div class="small text-muted">Расширенные права</div>
+                                <input type="radio" name="role" value="admin" class="visually-hidden">
+                            </div>
+                            <div class="role-option role-option-superadmin" data-role="superadmin">
+                                <i class="bi bi-shield-fill-exclamation"></i>
+                                <div class="fw-medium">Суперадмин</div>
+                                <div class="small text-muted">Полный доступ</div>
+                                <input type="radio" name="role" value="superadmin" class="visually-hidden">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Пароль -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="password" class="form-label">Пароль</label>
+                                <div class="input-with-icon position-relative">
+                                    <i class="bi bi-lock"></i>
+                                    <input type="password" class="form-control" id="password" name="password" required autocomplete="new-password">
+                                    <button type="button" class="password-toggle" id="togglePassword">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength-meter">
+                                    <div class="password-strength-meter-bar" id="passwordStrengthBar"></div>
+                                </div>
+                                <div class="password-strength-text" id="passwordStrengthText"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="password_confirm" class="form-label">Подтверждение пароля</label>
+                                <div class="input-with-icon position-relative">
+                                    <i class="bi bi-lock-fill"></i>
+                                    <input type="password" class="form-control" id="password_confirm" name="password_confirm" required autocomplete="new-password">
+                                    <button type="button" class="password-toggle" id="togglePasswordConfirm">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                </div>
+                                <div id="passwordMatch" class="form-text"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Генератор паролей -->
+                    <div class="password-generator">
+                        <div class="password-generator-header">
+                            <h6 class="mb-0">Генератор пароля</h6>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="generatePasswordBtn">Сгенерировать</button>
+                        </div>
+
+                        <div class="generated-password" id="generatedPassword">
+                            <span>Нажмите кнопку для генерации</span>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="copyPasswordBtn" disabled>
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="password-options">
+                                    <div class="password-option-check">
+                                        <input type="checkbox" id="includeUppercase" checked>
+                                        <label for="includeUppercase">Заглавные буквы</label>
+                                    </div>
+                                    <div class="password-option-check">
+                                        <input type="checkbox" id="includeLowercase" checked>
+                                        <label for="includeLowercase">Строчные буквы</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="password-options">
+                                    <div class="password-option-check">
+                                        <input type="checkbox" id="includeNumbers" checked>
+                                        <label for="includeNumbers">Цифры</label>
+                                    </div>
+                                    <div class="password-option-check">
+                                        <input type="checkbox" id="includeSymbols">
+                                        <label for="includeSymbols">Спецсимволы</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <label for="passwordLength" class="form-label d-flex justify-content-between">
+                                <span>Длина пароля</span>
+                                <span id="passwordLengthValue">12</span>
+                            </label>
+                            <input type="range" class="form-range" id="passwordLength" min="8" max="32" value="12">
+                        </div>
+                    </div>
+
+                    <!-- Настройки активности -->
+                    <div class="mt-4">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+                            <label class="form-check-label fw-medium" for="is_active">Активировать аккаунт</label>
+                        </div>
+                        <div class="form-text">Если опция отключена, пользователь не сможет войти в систему.</div>
+                    </div>
+
+                    <!-- Отправка уведомления -->
+                    <div class="mt-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="send_notification" name="send_notification" checked>
+                            <label class="form-check-label fw-medium" for="send_notification">Отправить уведомление по email</label>
+                        </div>
+                        <div class="form-text">Пользователь получит email с данными для входа.</div>
+                    </div>
+                </div>
+
+                <div class="form-card-footer">
+                    <a href="{{ url_for('admin_users_list') }}" class="btn btn-outline-secondary">Отмена</a>
+                    <button type="submit" class="btn btn-primary">Создать пользователя</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notifications -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="copyToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+            <i class="bi bi-clipboard-check me-2 text-success"></i>
+            <strong class="me-auto">Копирование</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            Пароль успешно скопирован в буфер обмена.
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Avatar preview
+        const usernameInput = document.getElementById('username');
+        const avatarPreview = document.getElementById('avatarPreview');
+
+        usernameInput.addEventListener('input', function() {
+            if (this.value) {
+                avatarPreview.textContent = this.value.charAt(0).toUpperCase();
+            } else {
+                avatarPreview.textContent = 'A';
+            }
+        });
+
+        // Role selection
+        const roleOptions = document.querySelectorAll('.role-option');
+
+        roleOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove active class from all options
+                roleOptions.forEach(opt => opt.classList.remove('active'));
+
+                // Add active class to selected option
+                this.classList.add('active');
+
+                // Check the hidden radio button
+                const radioInput = this.querySelector('input[type="radio"]');
+                radioInput.checked = true;
+            });
+        });
+
+        // Password toggling
+        const togglePassword = document.getElementById('togglePassword');
+        const togglePasswordConfirm = document.getElementById('togglePasswordConfirm');
+        const passwordInput = document.getElementById('password');
+        const passwordConfirmInput = document.getElementById('password_confirm');
+
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('bi-eye');
+            this.querySelector('i').classList.toggle('bi-eye-slash');
+        });
+
+        togglePasswordConfirm.addEventListener('click', function() {
+            const type = passwordConfirmInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordConfirmInput.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('bi-eye');
+            this.querySelector('i').classList.toggle('bi-eye-slash');
+        });
+
+        // Password strength meter
+        const passwordStrengthBar = document.getElementById('passwordStrengthBar');
+        const passwordStrengthText = document.getElementById('passwordStrengthText');
+
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            let feedback = '';
+
+            // Check length
+            if (password.length > 0) {
+                strength += password.length / 32 * 25; // 25% for length
+
+                // Check for numbers
+                if (/\d/.test(password)) {
+                    strength += 15; // 15% for numbers
+                }
+
+                // Check for lowercase
+                if (/[a-z]/.test(password)) {
+                    strength += 15; // 15% for lowercase
+                }
+
+                // Check for uppercase
+                if (/[A-Z]/.test(password)) {
+                    strength += 20; // 20% for uppercase
+                }
+
+                // Check for special chars
+                if (/[^A-Za-z0-9]/.test(password)) {
+                    strength += 25; // 25% for special chars
+                }
+
+                // Cap at 100%
+                strength = Math.min(strength, 100);
+
+                // Feedback based on strength
+                if (strength < 30) {
+                    feedback = 'Очень слабый';
+                    passwordStrengthBar.style.backgroundColor = '#FF3B30';
+                } else if (strength < 60) {
+                    feedback = 'Слабый';
+                    passwordStrengthBar.style.backgroundColor = '#FF9500';
+                } else if (strength < 80) {
+                    feedback = 'Средний';
+                    passwordStrengthBar.style.backgroundColor = '#FFCC00';
+                } else {
+                    feedback = 'Надежный';
+                    passwordStrengthBar.style.backgroundColor = '#34C759';
+                }
+            } else {
+                feedback = '';
+            }
+
+            // Update UI
+            passwordStrengthBar.style.width = strength + '%';
+            passwordStrengthText.textContent = feedback;
+
+            // Color the text based on strength
+            if (strength < 30) {
+                passwordStrengthText.style.color = '#FF3B30';
+            } else if (strength < 60) {
+                passwordStrengthText.style.color = '#FF9500';
+            } else if (strength < 80) {
+                passwordStrengthText.style.color = '#FFCC00';
+            } else {
+                passwordStrengthText.style.color = '#34C759';
+            }
+
+            // Check passwords match
+            checkPasswordsMatch();
+        });
+
+        // Check passwords match
+        const passwordMatch = document.getElementById('passwordMatch');
+
+        function checkPasswordsMatch() {
+            const password = passwordInput.value;
+            const confirmPassword = passwordConfirmInput.value;
+
+            if (confirmPassword) {
+                if (password === confirmPassword) {
+                    passwordMatch.textContent = 'Пароли совпадают';
+                    passwordMatch.style.color = '#34C759';
+                } else {
+                    passwordMatch.textContent = 'Пароли не совпадают';
+                    passwordMatch.style.color = '#FF3B30';
+                }
+            } else {
+                passwordMatch.textContent = '';
+            }
+        }
+
+        passwordConfirmInput.addEventListener('input', checkPasswordsMatch);
+
+        // Password generator
+        const generatePasswordBtn = document.getElementById('generatePasswordBtn');
+        const copyPasswordBtn = document.getElementById('copyPasswordBtn');
+        const generatedPassword = document.getElementById('generatedPassword');
+        const includeUppercase = document.getElementById('includeUppercase');
+        const includeLowercase = document.getElementById('includeLowercase');
+        const includeNumbers = document.getElementById('includeNumbers');
+        const includeSymbols = document.getElementById('includeSymbols');
+        const passwordLength = document.getElementById('passwordLength');
+        const passwordLengthValue = document.getElementById('passwordLengthValue');
+        const copyToast = new bootstrap.Toast(document.getElementById('copyToast'));
+
+        // Update password length value display
+        passwordLength.addEventListener('input', function() {
+            passwordLengthValue.textContent = this.value;
+        });
+
+        // Generate password
+        generatePasswordBtn.addEventListener('click', function() {
+            const length = parseInt(passwordLength.value);
+            let charset = '';
+            let password = '';
+
+            // Build charset based on options
+            if (includeUppercase.checked) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (includeLowercase.checked) charset += 'abcdefghijklmnopqrstuvwxyz';
+            if (includeNumbers.checked) charset += '0123456789';
+            if (includeSymbols.checked) charset += '!@#$%^&*()_+-=[]{}|;:,.<>?';
+
+            // Ensure at least one character set is selected
+            if (!charset) {
+                charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                // Check all checkboxes as fallback
+                includeLowercase.checked = true;
+                includeUppercase.checked = true;
+                includeNumbers.checked = true;
+            }
+
+            // Generate password
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * charset.length);
+                password += charset[randomIndex];
+            }
+
+            // Update UI
+            generatedPassword.querySelector('span').textContent = password;
+            copyPasswordBtn.disabled = false;
+
+            // Enable the button to use this password
+            document.getElementById('useGeneratedPasswordBtn').disabled = false;
+        });
+
+        // Copy generated password
+        copyPasswordBtn.addEventListener('click', function() {
+            const password = generatedPassword.querySelector('span').textContent;
+
+            navigator.clipboard.writeText(password).then(() => {
+                copyToast.show();
+            });
+        });
+
+        // Use generated password
+        document.getElementById('useGeneratedPasswordBtn').addEventListener('click', function() {
+            const password = generatedPassword.querySelector('span').textContent;
+
+            if (password && password !== 'Нажмите кнопку для генерации') {
+                passwordInput.value = password;
+                passwordConfirmInput.value = password;
+
+                // Trigger the input event to update strength meter
+                const event = new Event('input', { bubbles: true });
+                passwordInput.dispatchEvent(event);
+            }
+        });
+
+        // Form validation
+        const createUserForm = document.getElementById('createUserForm');
+
+        createUserForm.addEventListener('submit', function(e) {
+            let isValid = true;
+
+            // Check if passwords match
+            if (passwordInput.value !== passwordConfirmInput.value) {
+                isValid = false;
+                passwordMatch.textContent = 'Пароли не совпадают';
+                passwordMatch.style.color = '#FF3B30';
+            }
+
+            // Add more validations here if needed
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

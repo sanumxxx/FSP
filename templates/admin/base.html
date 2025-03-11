@@ -5,161 +5,394 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Админ-панель ФСПЗО{% endblock %}</title>
+    <!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='logo.svg') }}">
+    <!-- JetBrains Mono Font -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='admin/css/style.css') }}">
     <style>
         :root {
-            --primary-color: #8b5cf6;
-            --primary-dark: #6b46c1;
-            --primary-light: #a78bfa;
-            --secondary-color: #1e1e3f;
+            --ios-blue: #007AFF;
+            --ios-blue-dark: #0062CC;
+            --ios-blue-light: #56A0FF;
+            --ios-gray: #8E8E93;
+            --ios-light-gray: #F2F2F7;
+            --ios-dark-gray: #3A3A3C;
+            --ios-red: #FF3B30;
+            --ios-green: #34C759;
+            --ios-orange: #FF9500;
+            --ios-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --ios-sidebar-width: 260px;
+            --ios-sidebar-collapsed-width: 70px;
+            --ios-radius-sm: 8px;
+            --ios-radius-md: 12px;
+            --ios-radius-lg: 20px;
         }
 
+        /* Global Styles */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'JetBrains Mono', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--ios-light-gray);
+            font-size: 0.95rem;
+            letter-spacing: -0.2px;
         }
 
+        /* iOS-like Typography */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+        }
+
+        /* Cards */
+        .card {
+            border-radius: var(--ios-radius-md);
+            border: none;
+            box-shadow: var(--ios-card-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-weight: 600;
+            padding: 18px 20px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* iOS-like Sidebar */
         .sidebar {
-            background-color: var(--secondary-color);
-            color: white;
-            min-height: 100vh;
+            background-color: white;
+            color: var(--ios-dark-gray);
+            height: 100vh; /* Фиксированная высота */
             position: fixed;
-            width: 250px;
+            width: var(--ios-sidebar-width);
             z-index: 100;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            overflow-y: scroll; /* Явно указываем прокрутку */
+            overflow-x: hidden;
+            scrollbar-width: thin; /* Для Firefox */
+            scrollbar-color: rgba(0, 0, 0, 0.1) transparent; /* Для Firefox */
+        }
+
+        /* Стилизация полосы прокрутки для Chrome/Safari */
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
         }
 
         .sidebar .logo {
-            padding: 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             text-align: center;
         }
 
         .sidebar .logo h2 {
-            color: var(--primary-light);
-            font-size: 1.5rem;
+            color: var(--ios-blue);
+            font-size: 1.6rem;
             margin: 0;
+            font-weight: 700;
         }
 
         .sidebar .nav-item {
-            margin-bottom: 5px;
+            margin: 4px 8px;
         }
 
         .sidebar .nav-link {
-            color: rgba(255, 255, 255, 0.7);
-            padding: 10px 20px;
-            transition: all 0.3s ease;
+            color: var(--ios-dark-gray);
+            padding: 12px 16px;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
+            border-radius: var(--ios-radius-sm);
+            font-size: 0.9rem;
         }
 
         .sidebar .nav-link i {
-            margin-right: 10px;
             font-size: 1.2rem;
+            margin-right: 12px;
+            min-width: 24px;
+            text-align: center;
+            transition: all 0.2s ease;
         }
 
-        .sidebar .nav-link:hover,
+        .sidebar .nav-link:hover {
+            color: var(--ios-blue);
+            background-color: rgba(0, 122, 255, 0.08);
+        }
+
         .sidebar .nav-link.active {
-            color: white;
-            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--ios-blue);
+            background-color: rgba(0, 122, 255, 0.12);
+            font-weight: 500;
         }
 
-        .main-content {
-    margin-left: 250px;
-    padding: 20px;
-    width: calc(100% - 250px); /* Вычитаем ширину боковой панели */
-    min-height: 100vh;
-    transition: all 0.3s ease;
-}
-        .container-fluid {
-    width: 100%;
-    padding-right: 0;
-    padding-left: 0;
-}
+        .sidebar .nav-link.active i {
+            color: var(--ios-blue);
+        }
 
+        /* iOS-like Main Content */
+        .main-content {
+            margin-left: var(--ios-sidebar-width);
+            padding: 20px 28px;
+            width: calc(100% - var(--ios-sidebar-width));
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container-fluid {
+            width: 100%;
+            padding-right: 0;
+            padding-left: 0;
+        }
+
+        /* iOS-like Topbar */
         .topbar {
-            padding: 15px 30px;
+            padding: 16px 24px;
             background-color: white;
-            border-bottom: 1px solid #e0e0e0;
+            border-radius: var(--ios-radius-md);
+            box-shadow: var(--ios-card-shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .user-dropdown .dropdown-menu {
             right: 0;
             left: auto;
-        }
-
-        .card {
             border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border-radius: var(--ios-radius-sm);
+            padding: 8px;
         }
 
-        .card-header {
-            background-color: white;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.125);
-            font-weight: 600;
+        .user-dropdown .dropdown-item {
+            border-radius: var(--ios-radius-sm);
+            padding: 8px 16px;
+            transition: background-color 0.2s ease;
+        }
+
+        .user-dropdown .dropdown-item:hover {
+            background-color: var(--ios-light-gray);
+        }
+
+        /* iOS-like Buttons */
+        .btn {
+            border-radius: var(--ios-radius-sm);
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
         .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
+            background-color: var(--ios-blue);
+            border-color: var(--ios-blue);
         }
 
         .btn-primary:hover {
-            background-color: var(--primary-dark);
-            border-color: var(--primary-dark);
+            background-color: var(--ios-blue-dark);
+            border-color: var(--ios-blue-dark);
+        }
+
+        .btn-outline-primary {
+            color: var(--ios-blue);
+            border-color: var(--ios-blue);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--ios-blue);
+            border-color: var(--ios-blue);
+            color: white;
+        }
+
+        /* iOS-like Badges */
+        .badge {
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .badge.bg-success {
+            background-color: var(--ios-green) !important;
+        }
+
+        .badge.bg-warning {
+            background-color: var(--ios-orange) !important;
+        }
+
+        .badge.bg-danger {
+            background-color: var(--ios-red) !important;
+        }
+
+        /* iOS-like Forms */
+        .form-control, .form-select {
+            border-radius: var(--ios-radius-sm);
+            padding: 10px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background-color: rgba(242, 242, 247, 0.6);
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--ios-blue);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+        }
+
+        .form-label {
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--ios-dark-gray);
+            font-size: 0.85rem;
+        }
+
+        .form-text {
+            color: var(--ios-gray);
+            font-size: 0.8rem;
+            margin-top: 6px;
+        }
+
+        /* iOS-like Tables */
+        .table {
+            border-radius: var(--ios-radius-sm);
+            overflow: hidden;
         }
 
         .table th {
             font-weight: 600;
+            color: var(--ios-dark-gray);
+            background-color: rgba(242, 242, 247, 0.7);
+            border-bottom: none;
+            padding: 12px 16px;
         }
 
-        .dashboard-card {
-            border-radius: 15px;
+        .table td {
+            padding: 12px 16px;
+            vertical-align: middle;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(242, 242, 247, 0.3);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0, 122, 255, 0.05);
+        }
+
+        /* iOS-like Alerts */
+        .alert {
+            border-radius: var(--ios-radius-md);
             border: none;
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            padding: 16px;
+            box-shadow: var(--ios-card-shadow);
+        }
+
+        /* Dashboard Cards */
+        .dashboard-card {
+            border-radius: var(--ios-radius-md);
+            border: none;
+            box-shadow: var(--ios-card-shadow);
+            overflow: hidden;
         }
 
         .dashboard-card .card-body {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 24px;
         }
 
         .dashboard-card .card-icon {
-            width: 60px;
-            height: 60px;
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
-            background-color: var(--primary-light);
+            background-color: var(--ios-blue);
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 1.5rem;
+            font-size: 1.25rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+        }
+
+        .dashboard-card:hover .card-icon {
+            transform: scale(1.1) rotate(10deg);
         }
 
         .dashboard-card .card-details h3 {
-            font-size: 2rem;
-            margin-bottom: 5px;
+            font-size: 2.2rem;
+            margin-bottom: 4px;
+            font-weight: 700;
+            color: var(--ios-dark-gray);
         }
 
         .dashboard-card .card-details p {
-            color: #6c757d;
+            color: var(--ios-gray);
             margin: 0;
+            font-size: 0.9rem;
         }
 
+        /* Quick actions */
+        .hover-card {
+            transition: all 0.3s ease;
+            border-radius: var(--ios-radius-md);
+            background-color: white;
+            box-shadow: var(--ios-card-shadow);
+        }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+            background-color: rgba(0, 122, 255, 0.03) !important;
+        }
+
+        /* User Avatar */
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--ios-blue);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.2);
+        }
+
+        /* Mobile Responsive */
         @media (max-width: 768px) {
+            :root {
+                --ios-sidebar-width: var(--ios-sidebar-collapsed-width);
+            }
+
             .sidebar {
-                width: 80px;
+                width: var(--ios-sidebar-collapsed-width);
             }
 
             .sidebar .logo h2,
-            .sidebar .nav-link span {
+            .sidebar .nav-link span,
+            .sidebar .text-muted {
                 display: none;
             }
 
@@ -169,119 +402,153 @@
             }
 
             .main-content {
-        margin-left: 80px;
-        width: calc(100% - 80px); /* Вычитаем ширину свернутой боковой панели */
-    }
+                margin-left: var(--ios-sidebar-collapsed-width);
+                width: calc(100% - var(--ios-sidebar-collapsed-width));
+            }
+
+            .topbar {
+                padding: 12px 16px;
+            }
+        }
+
+        /* Dark mode support (basic) */
+        @media (prefers-color-scheme: dark) {
+            /* You can add dark mode styling here if desired */
+        }
+
+        /* Neat back-to-top button */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--ios-blue);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(20px);
+            z-index: 999;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <div class="d-flex">
-        <!-- Боковая панель -->
+        <!-- Sidebar -->
         <div class="sidebar">
             <div class="logo">
                 <h2>ФСПЗО</h2>
                 <div class="text-muted small mt-1">Админ-панель</div>
             </div>
-            <!-- Добавьте следующий код в шаблон templates/admin/base.html для изменения бокового меню -->
 
-<ul class="nav flex-column mt-4">
-    <li class="nav-item">
-        <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
-            <i class="bi bi-speedometer2"></i>
-            <span>Панель управления</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ url_for('admin_structure_list') }}" class="nav-link {% if 'admin_structure' in request.endpoint %}active{% endif %}">
-            <i class="bi bi-diagram-3"></i>
-            <span>Структура федерации</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ url_for('admin_news_list') }}" class="nav-link {% if 'admin_news' in request.endpoint %}active{% endif %}">
-            <i class="bi bi-newspaper"></i>
-            <span>Новости</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ url_for('admin_events_list') }}" class="nav-link {% if 'admin_events' in request.endpoint %}active{% endif %}">
-            <i class="bi bi-calendar-event"></i>
-            <span>Мероприятия</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ url_for('admin_participants_list') }}" class="nav-link {% if 'admin_participants' in request.endpoint %}active{% endif %}">
-            <i class="bi bi-people"></i>
-            <span>Участники</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ url_for('admin_teams_list') }}" class="nav-link {% if 'admin_teams' in request.endpoint %}active{% endif %}">
-            <i class="bi bi-people-fill"></i>
-            <span>Команды</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ url_for('admin_partners_list') }}" class="nav-link {% if 'admin_partners' in request.endpoint %}active{% endif %}">
-            <i class="bi bi-building"></i>
-            <span>Партнеры</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ url_for('admin_gallery_list') }}" class="nav-link {% if 'admin_gallery' in request.endpoint %}active{% endif %}">
-            <i class="bi bi-images"></i>
-            <span>Галерея</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ url_for('home') }}" class="nav-link" target="_blank">
-            <i class="bi bi-globe"></i>
-            <span>Перейти на сайт</span>
-        </a>
-    </li>
-    {% if current_user.role == 'superadmin' %}
-    <li class="nav-item">
-        <a href="{{ url_for('admin_users_list') }}" class="nav-link {% if 'admin_users' in request.endpoint %}active{% endif %}">
-            <i class="bi bi-person-gear"></i>
-            <span>Пользователи</span>
-        </a>
-    </li>
-    <li class="nav-item">
-        <a href="{{ url_for('admin_statistics') }}" class="nav-link {% if 'admin_statistics' in request.endpoint %}active{% endif %}">
-            <i class="bi bi-bar-chart"></i>
-            <span>Статистика</span>
-        </a>
-    </li>
-    {% endif %}
-    <li class="nav-item mt-5">
-        <a href="{{ url_for('logout') }}" class="nav-link text-danger">
-            <i class="bi bi-box-arrow-right"></i>
-            <span>Выйти</span>
-        </a>
-    </li>
-</ul>
+            <ul class="nav flex-column mt-4">
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_dashboard') }}" class="nav-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Панель управления</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_structure_list') }}" class="nav-link {% if 'admin_structure' in request.endpoint %}active{% endif %}">
+                        <i class="bi bi-diagram-3"></i>
+                        <span>Структура федерации</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_news_list') }}" class="nav-link {% if 'admin_news' in request.endpoint %}active{% endif %}">
+                        <i class="bi bi-newspaper"></i>
+                        <span>Новости</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_events_list') }}" class="nav-link {% if 'admin_events' in request.endpoint %}active{% endif %}">
+                        <i class="bi bi-calendar-event"></i>
+                        <span>Мероприятия</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_participants_list') }}" class="nav-link {% if 'admin_participants' in request.endpoint %}active{% endif %}">
+                        <i class="bi bi-people"></i>
+                        <span>Участники</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_teams_list') }}" class="nav-link {% if 'admin_teams' in request.endpoint %}active{% endif %}">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Команды</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_partners_list') }}" class="nav-link {% if 'admin_partners' in request.endpoint %}active{% endif %}">
+                        <i class="bi bi-building"></i>
+                        <span>Партнеры</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_gallery_list') }}" class="nav-link {% if 'admin_gallery' in request.endpoint %}active{% endif %}">
+                        <i class="bi bi-images"></i>
+                        <span>Галерея</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('home') }}" class="nav-link" target="_blank">
+                        <i class="bi bi-globe"></i>
+                        <span>Перейти на сайт</span>
+                    </a>
+                </li>
+                {% if current_user.role == 'superadmin' %}
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_users_list') }}" class="nav-link {% if 'admin_users' in request.endpoint %}active{% endif %}">
+                        <i class="bi bi-person-gear"></i>
+                        <span>Пользователи</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('admin_statistics') }}" class="nav-link {% if 'admin_statistics' in request.endpoint %}active{% endif %}">
+                        <i class="bi bi-bar-chart"></i>
+                        <span>Статистика</span>
+                    </a>
+                </li>
+                {% endif %}
+                <li class="nav-item mt-5">
+                    <a href="{{ url_for('logout') }}" class="nav-link" style="color: var(--ios-red);">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Выйти</span>
+                    </a>
+                </li>
+            </ul>
         </div>
 
-        <!-- Основной контент -->
+        <!-- Main Content -->
         <div class="main-content">
             <div class="topbar">
-                <h4 class="m-0">{% block page_title %}Админ-панель{% endblock %}</h4>
+                <h4 class="m-0 fw-bold">{% block page_title %}Админ-панель{% endblock %}</h4>
                 <div class="dropdown user-dropdown">
-                    <button class="btn dropdown-toggle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                        <div class="me-2">
+                    <button class="btn dropdown-toggle d-flex align-items-center border-0 bg-transparent" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="me-2 text-end">
                             <div class="fw-bold">{{ current_user.username }}</div>
                             <div class="text-muted small">{{ current_user.role }}</div>
                         </div>
-                        <div class="avatar bg-primary rounded-circle text-white d-flex justify-content-center align-items-center" style="width: 40px; height: 40px;">
+                        <div class="avatar">
                             {{ current_user.username[0].upper() }}
                         </div>
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" href="{{ url_for('admin_profile') }}">Мой профиль</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('admin_profile') }}"><i class="bi bi-person me-2"></i>Мой профиль</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="{{ url_for('logout') }}">Выйти</a></li>
+                        <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Выйти</a></li>
                     </ul>
                 </div>
             </div>
@@ -299,14 +566,40 @@
                     {% endif %}
                 {% endwith %}
 
-                <!-- Основной контент страницы -->
+                <!-- Main Content -->
                 {% block content %}{% endblock %}
             </div>
         </div>
     </div>
 
+    <!-- Back to top button -->
+    <div class="back-to-top">
+        <i class="bi bi-arrow-up"></i>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Back to top button functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const backToTopBtn = document.querySelector('.back-to-top');
+
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            });
+
+            backToTopBtn.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
     <script src="{{ url_for('static', filename='admin/js/admin.js') }}"></script>
     {% block extra_js %}{% endblock %}
 </body>
