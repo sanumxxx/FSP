@@ -1,0 +1,101 @@
+{# templates/admin/teams/list.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Команды | Админ-панель ФСПЗО{% endblock %}
+{% block page_title %}Управление командами{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Список команд</span>
+        <a href="{{ url_for('admin_teams_create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> Добавить команду
+        </a>
+    </div>
+    <div class="card-body">
+        {% if teams %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th width="5%">#</th>
+                        <th width="15%">Логотип</th>
+                        <th width="20%">Название команды</th>
+                        <th width="15%">Город</th>
+                        <th width="15%">Организация</th>
+                        <th width="10%">Участники</th>
+                        <th width="10%">Статус</th>
+                        <th width="10%">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for team in teams %}
+                    <tr>
+                        <td>{{ team.id }}</td>
+                        <td>
+                            {% if team.logo %}
+                            <img src="{{ url_for('static', filename=team.logo) }}" alt="{{ team.name }}" class="img-thumbnail" style="max-height: 80px;">
+                            {% else %}
+                            <div class="text-center text-muted">
+                                <i class="bi bi-people-fill" style="font-size: 2rem;"></i>
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>{{ team.name }}</td>
+                        <td>{{ team.city }}</td>
+                        <td>{{ team.organization }}</td>
+                        <td>
+                            <a href="{{ url_for('admin_team_members', team_id=team.id) }}" class="btn btn-sm btn-outline-info">
+                                {{ team.members|length }} <i class="bi bi-people"></i>
+                            </a>
+                        </td>
+                        <td>
+                            {% if team.is_active %}
+                            <span class="badge bg-success">Активна</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Скрыта</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('admin_teams_edit', id=team.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteTeamModal{{ team.id }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+
+                            <!-- Modal for deletion confirmation -->
+                            <div class="modal fade" id="deleteTeamModal{{ team.id }}" tabindex="-1" aria-labelledby="deleteTeamModalLabel{{ team.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteTeamModalLabel{{ team.id }}">Подтверждение удаления</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Вы уверены, что хотите удалить команду "{{ team.name }}"?</p>
+                                            <p class="text-danger">Это также удалит все записи об участии этой команды в мероприятиях!</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                            <form action="{{ url_for('admin_teams_delete', id=team.id) }}" method="post">
+                                                <button type="submit" class="btn btn-danger">Удалить</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center my-5">Нет добавленных команд</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

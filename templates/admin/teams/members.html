@@ -1,0 +1,716 @@
+{# templates/admin/teams/members.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Состав команды | Админ-панель ФСПЗО{% endblock %}
+{% block page_title %}Управление составом команды{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<style>
+    .team-header {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .team-logo {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        padding: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .team-logo-placeholder {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .role-badge {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.5rem;
+    }
+
+    .captain-row {
+        background-color: rgba(var(--bs-primary-rgb), 0.05);
+    }
+
+    .member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        background-color: var(--primary-color);
+        font-weight: bold;
+    }
+
+    .member-card {
+        transition: all 0.2s ease;
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .member-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .member-card .card-body {
+        padding: 1rem;
+    }
+
+    .member-actions {
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .member-card:hover .member-actions {
+        opacity: 1;
+    }
+
+    /* Фиксация проблем со стилями Select2 */
+    .select2-container {
+        width: 100% !important;
+        z-index: 1060 !important; /* Для отображения поверх модальных окон */
+    }
+
+    .select2-container--default .select2-selection--single {
+        height: calc(1.5em + 0.75rem + 2px);
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        font-weight: 400;
+        line-height: 1.5;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding-left: 0;
+        padding-right: 20px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100%;
+    }
+
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        padding: 0.375rem 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+
+    .select2-dropdown {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+
+    .event-badge {
+        display: inline-block;
+        font-size: 0.8em;
+        border-radius: 4px;
+        padding: 0.25em 0.5em;
+        margin: 0.2em;
+        background-color: #f1f5f9;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 150px;
+    }
+
+    .event-badge.gold {
+        background-color: #fef9c3;
+        color: #854d0e;
+    }
+
+    .event-badge.silver {
+        background-color: #f1f5f9;
+        color: #475569;
+    }
+
+    .event-badge.bronze {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Отладочная информация -->
+<div class="alert alert-info mb-3">
+    <p class="mb-0"><strong>Доступно участников для добавления:</strong> {{ available_participants|length }}</p>
+    <ul class="mb-0">
+    {% for p in available_participants %}
+        <li>{{ p.id }} - {{ p.name }} ({{ p.city }})</li>
+    {% endfor %}
+    </ul>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="team-header">
+            {% if team.logo %}
+            <img src="{{ url_for('static', filename=team.logo) }}" alt="{{ team.name }}" class="team-logo">
+            {% else %}
+            <div class="team-logo-placeholder">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            {% endif %}
+            <div>
+                <h5 class="mb-0">{{ team.name }}</h5>
+                <div class="text-muted small">{{ team.city }}{% if team.organization %}, {{ team.organization }}{% endif %}</div>
+            </div>
+        </div>
+        <div>
+            <a href="{{ url_for('admin_teams_edit', id=team.id) }}" class="btn btn-outline-primary btn-sm me-2">
+                <i class="bi bi-pencil"></i> Редактировать команду
+            </a>
+            <a href="{{ url_for('admin_teams_list') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> К списку команд
+            </a>
+        </div>
+    </div>
+    {% if team.description %}
+    <div class="card-body">
+        <p class="card-text">{{ team.description }}</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row">
+    <!-- Список участников команды -->
+    <div class="col-lg-8">
+        <!-- Простая отладочная форма -->
+        <div class="card mb-3">
+            <div class="card-header">Простая форма для добавления участника</div>
+            <div class="card-body">
+                <form action="{{ url_for('admin_team_add_member', team_id=team.id) }}" method="post">
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Участник</label>
+                            <select class="form-select" name="participant_id" required>
+                                <option value="">Выберите участника</option>
+                                {% for p in available_participants %}
+                                <option value="{{ p.id }}">{{ p.name }} ({{ p.city }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Роль</label>
+                            <select class="form-select" name="role">
+                                <option value="">Без роли</option>
+                                <option value="Капитан">Капитан</option>
+                                <option value="Участник">Участник</option>
+                                <option value="Тренер">Тренер</option>
+                                <option value="Запасной">Запасной</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-sm btn-primary">Добавить участника</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Участники команды ({{ members|length }})</span>
+                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                    <i class="bi bi-plus"></i> Добавить участника
+                </button>
+            </div>
+            {% if members %}
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>Участник</th>
+                                <th>Организация</th>
+                                <th>Город</th>
+                                <th>Роль</th>
+                                <th>Дата вступления</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in members %}
+                            <tr {% if member.role == 'Капитан' %}class="captain-row"{% endif %}>
+                                <td>{{ loop.index }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="member-avatar me-2">
+                                            {{ member.participant_name[0]|upper }}
+                                        </div>
+                                        <div>
+                                            <a href="{{ url_for('admin_participants_edit', id=member.participant_id) }}">
+                                                {{ member.participant_name }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ member.organization }}</td>
+                                <td>{{ member.city }}</td>
+                                <td>
+                                    {% if member.role %}
+                                    <span class="badge {% if member.role == 'Капитан' %}bg-primary{% elif member.role == 'Тренер' %}bg-success{% elif member.role == 'Запасной' %}bg-warning text-dark{% else %}bg-info{% endif %} role-badge">
+                                        {{ member.role }}
+                                    </span>
+                                    {% else %}
+                                    <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ member.joined_at.strftime('%d.%m.%Y') }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-member"
+                                            data-id="{{ member.id }}"
+                                            data-name="{{ member.participant_name }}"
+                                            data-role="{{ member.role }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-member"
+                                            data-id="{{ member.id }}"
+                                            data-name="{{ member.participant_name }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% else %}
+            <div class="card-body">
+                <div class="text-center py-4">
+                    <div class="display-6 text-muted mb-3">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <p class="text-muted">В команде пока нет участников</p>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                        <i class="bi bi-plus"></i> Добавить первого участника
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Карточки участников (альтернативный вид) -->
+        <div class="card">
+            <div class="card-header">
+                <span>Состав команды</span>
+            </div>
+            {% if members %}
+            <div class="card-body">
+                <div class="row">
+                    {% for member in members %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="member-card h-100">
+                            <div class="p-3 {% if member.role == 'Капитан' %}bg-primary text-white{% elif member.role == 'Тренер' %}bg-success text-white{% elif member.role == 'Запасной' %}bg-warning{% else %}bg-light{% endif %}">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="fw-bold">{{ member.participant_name }}</div>
+                                    {% if member.role %}
+                                    <span class="badge bg-white text-dark">{{ member.role }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="small">{{ member.city }}{% if member.organization %}, {{ member.organization }}{% endif %}</div>
+                            </div>
+                            <div class="card-body position-relative">
+                                <div class="small text-muted mb-2">
+                                    В команде с {{ member.joined_at.strftime('%d.%m.%Y') }}
+                                </div>
+
+                                <div class="member-actions position-absolute bottom-0 end-0 m-2">
+                                    <button type="button" class="btn btn-sm btn-outline-primary edit-member"
+                                            data-id="{{ member.id }}"
+                                            data-name="{{ member.participant_name }}"
+                                            data-role="{{ member.role }}">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger delete-member"
+                                            data-id="{{ member.id }}"
+                                            data-name="{{ member.participant_name }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="card-body">
+                <p class="text-center text-muted py-4">Нет участников команды</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Информация о команде и статистика -->
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <span>Информация о команде</span>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6 class="text-muted mb-1">Название</h6>
+                    <p class="mb-3">{{ team.name }}</p>
+
+                    <h6 class="text-muted mb-1">Город</h6>
+                    <p class="mb-3">{{ team.city or '—' }}</p>
+
+                    <h6 class="text-muted mb-1">Организация</h6>
+                    <p class="mb-3">{{ team.organization or '—' }}</p>
+
+                    <h6 class="text-muted mb-1">Статус</h6>
+                    <p class="mb-3">
+                        {% if team.is_active %}
+                        <span class="badge bg-success">Активна</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Скрыта</span>
+                        {% endif %}
+                    </p>
+
+                    <h6 class="text-muted mb-1">Дата создания</h6>
+                    <p class="mb-0">{{ team.created_at.strftime('%d.%m.%Y') }}</p>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('admin_teams_edit', id=team.id) }}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-pencil"></i> Редактировать команду
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <span>Статистика участия в мероприятиях</span>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-4">
+                    <div class="col-6">
+                        <h3 class="mb-0">{{ team.event_participations|length }}</h3>
+                        <div class="text-muted">Всего мероприятий</div>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="mb-0">{{ team.event_participations|selectattr('place', 'defined')|selectattr('place', 'le', 3)|list|length }}</h3>
+                        <div class="text-muted">Призовых мест</div>
+                    </div>
+                </div>
+
+                {% if team.event_participations %}
+                <h6 class="text-muted mb-2">Последние результаты</h6>
+                <div class="list-group list-group-flush mb-3">
+                    {% for participation in team.event_participations|sort(attribute='event.start_date', reverse=True)|first(5) %}
+                    <div class="list-group-item list-group-item-action p-2">
+                        <div class="d-flex justify-content-between">
+                            <div class="text-truncate" style="max-width: 70%;">
+                                <a href="{{ url_for('admin_events_edit', id=participation.event_id) }}" class="text-decoration-none">
+                                    {{ participation.event.title }}
+                                </a>
+                            </div>
+                            {% if participation.place %}
+                            <span class="badge {% if participation.place == 1 %}bg-warning text-dark{% elif participation.place == 2 %}bg-secondary{% elif participation.place == 3 %}bg-danger{% else %}bg-light text-dark{% endif %}">
+                                {{ participation.place }} место
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="text-muted small mt-1">{{ participation.event.start_date.strftime('%d.%m.%Y') }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if team.event_participations|length > 5 %}
+                <div class="text-center">
+                    <a href="#" class="btn btn-sm btn-outline-secondary">
+                        Все результаты ({{ team.event_participations|length }})
+                    </a>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="text-center py-3">
+                    <p class="text-muted mb-0">Команда еще не участвовала в мероприятиях</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span>Достижения</span>
+            </div>
+            <div class="card-body">
+                {% set gold_medals = team.event_participations|selectattr('place', 'defined')|selectattr('place', 'equalto', 1)|list|length %}
+                {% set silver_medals = team.event_participations|selectattr('place', 'defined')|selectattr('place', 'equalto', 2)|list|length %}
+                {% set bronze_medals = team.event_participations|selectattr('place', 'defined')|selectattr('place', 'equalto', 3)|list|length %}
+
+                <div class="d-flex justify-content-around text-center mb-4">
+                    <div>
+                        <div class="display-6 text-warning">
+                            <i class="bi bi-trophy-fill"></i>
+                        </div>
+                        <h4>{{ gold_medals }}</h4>
+                        <div class="text-muted small">Золото</div>
+                    </div>
+                    <div>
+                        <div class="display-6 text-secondary">
+                            <i class="bi bi-award-fill"></i>
+                        </div>
+                        <h4>{{ silver_medals }}</h4>
+                        <div class="text-muted small">Серебро</div>
+                    </div>
+                    <div>
+                        <div class="display-6 text-danger">
+                            <i class="bi bi-award"></i>
+                        </div>
+                        <h4>{{ bronze_medals }}</h4>
+                        <div class="text-muted small">Бронза</div>
+                    </div>
+                </div>
+
+                {% if gold_medals > 0 or silver_medals > 0 or bronze_medals > 0 %}
+                <h6 class="text-muted mb-2">Призовые мероприятия</h6>
+                <div>
+                    {% for participation in team.event_participations|selectattr('place', 'defined')|selectattr('place', 'le', 3)|sort(attribute='place')|sort(attribute='event.start_date', reverse=True) %}
+                    <span class="event-badge {% if participation.place == 1 %}gold{% elif participation.place == 2 %}silver{% elif participation.place == 3 %}bronze{% endif %}" title="{{ participation.event.title }}">
+                        {{ participation.place }} место - {{ participation.event.title|truncate(20) }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-center text-muted">У команды пока нет призовых мест</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно добавления участника -->
+<div class="modal fade" id="addMemberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Добавить участника в команду</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="add-member-form" action="{{ url_for('admin_team_add_member', team_id=team.id) }}" method="post">
+                    <div class="mb-3">
+                        <label for="participant_id" class="form-label">Участник</label>
+                        <select class="form-select" id="participant_id" name="participant_id" required>
+                            <option value="">Выберите участника</option>
+                            {% for p in available_participants %}
+                            <option value="{{ p.id }}">{{ p.name }} ({{ p.city }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Выберите участника из списка для добавления в команду</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Роль в команде</label>
+                        <select class="form-select" id="role" name="role">
+                            <option value="">Без роли</option>
+                            <option value="Капитан">Капитан</option>
+                            <option value="Участник">Участник</option>
+                            <option value="Тренер">Тренер</option>
+                            <option value="Запасной">Запасной</option>
+                        </select>
+                        <div class="form-text">Необязательно. Используется для обозначения роли участника в команде.</div>
+                    </div>
+                    <div class="alert alert-info">
+                        <div class="d-flex">
+                            <div class="me-2">
+                                <i class="bi bi-info-circle-fill"></i>
+                            </div>
+                            <div>
+                                <strong>Подсказка:</strong>
+                                <ul class="mb-0 ps-3">
+                                    <li>Если участник уже состоит в другой команде, его можно добавить и в эту команду.</li>
+                                    <li>В команде может быть только один капитан.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="add-member-form" class="btn btn-primary">Добавить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования участника -->
+<div class="modal fade" id="editMemberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Редактировать роль участника</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-member-form" action="{{ url_for('admin_team_update_member', team_id=team.id) }}" method="post">
+                    <input type="hidden" id="edit_id" name="id">
+                    <div class="mb-3">
+                        <label for="edit_member_name" class="form-label">Участник</label>
+                        <input type="text" class="form-control" id="edit_member_name" readonly disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_role" class="form-label">Роль в команде</label>
+                        <select class="form-select" id="edit_role" name="role">
+                            <option value="">Без роли</option>
+                            <option value="Капитан">Капитан</option>
+                            <option value="Участник">Участник</option>
+                            <option value="Тренер">Тренер</option>
+                            <option value="Запасной">Запасной</option>
+                        </select>
+                        <div class="form-text">Назначьте роль участнику в команде</div>
+                    </div>
+                    <div class="alert alert-warning" id="captain-warning" style="display: none;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span>Внимание! В команде уже есть капитан. При сохранении текущий капитан будет заменен.</span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="edit-member-form" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления участника -->
+<div class="modal fade" id="deleteMemberModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить участника <span id="delete-member-name" class="fw-bold"></span> из команды?</p>
+                <p class="text-muted">Это действие не удалит самого участника из базы данных, а только открепит его от этой команды.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form id="delete-member-form" action="{{ url_for('admin_team_remove_member', team_id=team.id) }}" method="post">
+                    <input type="hidden" id="delete_id" name="id">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        console.log("DOM загружен, инициализация JavaScript");
+
+        // Отладка доступных участников
+        console.log("Количество доступных участников: " + $('#participant_id option').length);
+
+        try {
+            // Пробуем инициализировать Select2 с базовыми настройками
+            $('#participant_id').select2({
+                dropdownParent: $('#addMemberModal'), // Важно для правильного отображения в модальном окне
+                width: '100%',
+                placeholder: "Выберите участника"
+            });
+            console.log("Select2 инициализирован");
+        } catch (e) {
+            console.error("Ошибка инициализации Select2:", e);
+        }
+
+        // Проверка наличия капитана при выборе роли капитана
+        $('#role, #edit_role').on('change', function() {
+            const hasTeamCaptain = {{ 'true' if members|selectattr('role', 'equalto', 'Капитан')|list|length > 0 else 'false' }};
+
+            if ($(this).val() === 'Капитан' && hasTeamCaptain) {
+                $('#captain-warning').show();
+            } else {
+                $('#captain-warning').hide();
+            }
+        });
+
+        // Инициализация модальных окон для редактирования и удаления участников
+        const editButtons = document.querySelectorAll('.edit-member');
+        const deleteButtons = document.querySelectorAll('.delete-member');
+
+        // Модальные окна
+        if (document.getElementById('editMemberModal')) {
+            try {
+                const editModal = new bootstrap.Modal(document.getElementById('editMemberModal'));
+
+                // Обработка клика по кнопке редактирования
+                editButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        const name = this.getAttribute('data-name');
+                        const role = this.getAttribute('data-role') || '';
+
+                        document.getElementById('edit_id').value = id;
+                        document.getElementById('edit_member_name').value = name;
+                        document.getElementById('edit_role').value = role;
+
+                        if (role === 'Капитан') {
+                            $('#captain-warning').hide();
+                        } else if ($('#edit_role').val() === 'Капитан') {
+                            const hasTeamCaptain = {{ 'true' if members|selectattr('role', 'equalto', 'Капитан')|list|length > 0 else 'false' }};
+                            if (hasTeamCaptain) {
+                                $('#captain-warning').show();
+                            }
+                        }
+
+                        editModal.show();
+                    });
+                });
+            } catch (e) {
+                console.error("Ошибка при инициализации модального окна редактирования:", e);
+            }
+        }
+
+        if (document.getElementById('deleteMemberModal')) {
+            try {
+                const deleteModal = new bootstrap.Modal(document.getElementById('deleteMemberModal'));
+
+                // Обработка клика по кнопке удаления
+                deleteButtons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        const name = this.getAttribute('data-name');
+
+                        document.getElementById('delete_id').value = id;
+                        document.getElementById('delete-member-name').textContent = name;
+
+                        deleteModal.show();
+                    });
+                });
+            } catch (e) {
+                console.error("Ошибка при инициализации модального окна удаления:", e);
+            }
+        }
+    });
+</script>
+{% endblock %}

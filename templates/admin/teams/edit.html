@@ -1,0 +1,132 @@
+{# templates/admin/teams/edit.html #}
+{% extends 'admin/base.html' %}
+
+{% block title %}Редактирование команды | Админ-панель ФСПЗО{% endblock %}
+{% block page_title %}Редактирование команды{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Редактирование команды: {{ team.name }}</span>
+        <a href="{{ url_for('admin_teams_list') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку
+        </a>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('admin_teams_edit', id=team.id) }}" method="post" enctype="multipart/form-data">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Название команды</label>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ team.name }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="city" class="form-label">Город</label>
+                        <input type="text" class="form-control" id="city" name="city" value="{{ team.city }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label for="organization" class="form-label">Организация</label>
+                <input type="text" class="form-control" id="organization" name="organization" value="{{ team.organization }}">
+                <div class="form-text">Название учебного заведения или компании, которую представляет команда</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание</label>
+                <textarea class="form-control" id="description" name="description" rows="4">{{ team.description }}</textarea>
+                <div class="form-text">Информация о команде, история, достижения</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="logo" class="form-label">Логотип команды</label>
+                {% if team.logo %}
+                <div class="mb-2">
+                    <img src="{{ url_for('static', filename=team.logo) }}" alt="{{ team.name }}" class="img-thumbnail" style="max-height: 200px;">
+                </div>
+                {% endif %}
+                <input class="form-control" type="file" id="logo" name="logo" accept="image/*">
+                <div class="form-text">Загрузите новый логотип, если хотите заменить текущий. Рекомендуемый размер: 300x300px.</div>
+            </div>
+
+            <div class="mb-4">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if team.is_active %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">Команда активна</label>
+                </div>
+                <div class="form-text">Если отключено, команда не будет отображаться на сайте</div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('admin_team_members', team_id=team.id) }}" class="btn btn-info">
+                    <i class="bi bi-people"></i> Управление составом команды
+                </a>
+                <div>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteTeamModal">
+                        <i class="bi bi-trash"></i> Удалить команду
+                    </button>
+                    <button type="submit" class="btn btn-primary ms-2">
+                        <i class="bi bi-save"></i> Сохранить изменения
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения удаления -->
+<div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTeamModalLabel">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить команду "{{ team.name }}"?</p>
+                <p class="text-danger"><strong>Внимание:</strong> Это также удалит все записи об участии этой команды в мероприятиях!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form action="{{ url_for('admin_teams_delete', id=team.id) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Предпросмотр логотипа при изменении
+        const logoInput = document.getElementById('logo');
+
+        logoInput.addEventListener('change', function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    // Обновляем уже существующее изображение или создаем новое
+                    let previewImg = document.querySelector('.img-thumbnail');
+
+                    if (!previewImg) {
+                        previewImg = document.createElement('img');
+                        previewImg.classList.add('img-thumbnail');
+                        previewImg.style.maxHeight = '200px';
+                        logoInput.parentNode.insertBefore(previewImg, logoInput.nextSibling);
+                    }
+
+                    previewImg.src = e.target.result;
+                };
+
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -48,14 +48,73 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+
+class Team(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    organization = db.Column(db.String(200))
+    city = db.Column(db.String(100))
+    logo = db.Column(db.String(200))  # Path to the logo file
+    description = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
+
+    # Relationships
+    members = db.relationship('TeamMember', backref='team', lazy=True, cascade="all, delete-orphan")
+    event_participations = db.relationship('EventParticipant', backref='team', lazy=True)
+
+    def __repr__(self):
+        return f'<Team {self.name}>'
+
+
+class TeamMember(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=False)
+    participant_id = db.Column(db.Integer, db.ForeignKey('participant.id'), nullable=False)
+    role = db.Column(db.String(50))  # e.g., "captain", "member"
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('team_id', 'participant_id', name='_team_participant_uc'),
+    )
+
+    def __repr__(self):
+        return f'<TeamMember {self.participant_id} in Team {self.team_id}>'
+
+
 class EventParticipant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
-    participant_id = db.Column(db.Integer, db.ForeignKey('participant.id'), nullable=False)
+    participant_id = db.Column(db.Integer, db.ForeignKey('participant.id'), nullable=True)
+    team_id = db.Column(db.Integer, db.ForeignKey('team.id'), nullable=True)
     place = db.Column(db.Integer, nullable=True)
     score = db.Column(db.Float, default=0)
     rating_change = db.Column(db.Integer, default=0)
-    # Дополнительные поля при необходимости
+    is_team = db.Column(db.Boolean, default=False)  # Flag to indicate if this is a team entry
+
+    # Add a CheckConstraint to ensure at least one of participant_id or team_id is not null
+    __table_args__ = (
+        db.CheckConstraint('participant_id IS NOT NULL OR team_id IS NOT NULL',
+                           name='_participant_or_team_required'),
+    )
+
+    def __repr__(self):
+        if self.participant_id:
+            return f'<EventParticipant Participant:{self.participant_id} in Event:{self.event_id}>'
+        else:
+            return f'<EventParticipant Team:{self.team_id} in Event:{self.event_id}>'
+
+
+# Add this line to the Participant model to establish the relationship
+# Find the Participant model and add this line inside the class:
+team_memberships = db.relationship('TeamMember', backref='participant', lazy=True)
+
+# Add this line to the Event model to access team participants more easily
+# Find the Event model and add this line inside the class:
+team_participants = db.relationship('EventParticipant',
+                                    primaryjoin="and_(EventParticipant.event_id==Event.id, "
+                                                "EventParticipant.team_id!=None)",
+                                    backref="event_teams", lazy=True)
 
 class FederationMember(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -200,13 +259,14 @@ def admin_structure_list():
     return render_template('admin/structure/list.html', members=members)
 
 
-# Просмотр участников мероприятия
 @app.route('/admin/events/<int:event_id>/participants')
 @login_required
 def admin_event_participants(event_id):
+    """Страница со списком участников мероприятия (индивидуальных и команд)"""
     event = Event.query.get_or_404(event_id)
-    # Получаем всех участников этого мероприятия через связь EventParticipant
-    participants_query = db.session.query(
+
+    # Получаем индивидуальных участников этого мероприятия
+    individual_participants = db.session.query(
         EventParticipant,
         Participant.name.label('participant_name'),
         Participant.organization,
@@ -214,15 +274,18 @@ def admin_event_participants(event_id):
     ).join(
         Participant, EventParticipant.participant_id == Participant.id
     ).filter(
-        EventParticipant.event_id == event_id
+        EventParticipant.event_id == event_id,
+        EventParticipant.participant_id != None
     ).all()
 
-    # Преобразуем результаты запроса в список словарей для удобного использования в шаблоне
-    participants_data = []
-    for p_event, p_name, p_org, p_city in participants_query:
-        participants_data.append({
+    # Преобразуем результаты запроса в список словарей для индивидуальных участников
+    individual_data = []
+    for p_event, p_name, p_org, p_city in individual_participants:
+        individual_data.append({
             'id': p_event.id,
             'participant_id': p_event.participant_id,
+            'team_id': None,
+            'is_team': False,
             'participant_name': p_name,
             'organization': p_org,
             'city': p_city,
@@ -231,47 +294,109 @@ def admin_event_participants(event_id):
             'rating_change': p_event.rating_change
         })
 
-    # Для выпадающего списка при добавлении новых участников
+    # Получаем команды этого мероприятия
+    team_participants = db.session.query(
+        EventParticipant,
+        Team.name.label('team_name'),
+        Team.organization,
+        Team.city
+    ).join(
+        Team, EventParticipant.team_id == Team.id
+    ).filter(
+        EventParticipant.event_id == event_id,
+        EventParticipant.team_id != None
+    ).all()
+
+    # Преобразуем результаты запроса в список словарей для команд
+    team_data = []
+    for p_event, t_name, t_org, t_city in team_participants:
+        team_data.append({
+            'id': p_event.id,
+            'participant_id': None,
+            'team_id': p_event.team_id,
+            'is_team': True,
+            'participant_name': t_name,  # Используем имя команды
+            'organization': t_org,
+            'city': t_city,
+            'place': p_event.place,
+            'score': p_event.score,
+            'rating_change': p_event.rating_change
+        })
+
+    # Объединяем данные для отображения в шаблоне
+    participants_data = individual_data + team_data
+
+    # Сортируем по месту (сначала с указанным местом, потом все остальные)
+    participants_data.sort(key=lambda x: (x['place'] is None, x['place']))
+
+    # Для выпадающих списков при добавлении новых участников
     all_participants = Participant.query.order_by(Participant.name).all()
+    all_teams = Team.query.order_by(Team.name).all()
+
+    # Исключаем уже добавленных индивидуальных участников
+    added_participant_ids = [p['participant_id'] for p in individual_data if p['participant_id'] is not None]
+    available_participants = [p for p in all_participants if p.id not in added_participant_ids]
+
+    # Исключаем уже добавленные команды
+    added_team_ids = [p['team_id'] for p in team_data if p['team_id'] is not None]
+    available_teams = [t for t in all_teams if t.id not in added_team_ids]
 
     return render_template(
         'admin/events/participants.html',
         event=event,
         participants=participants_data,
-        all_participants=all_participants
+        all_participants=available_participants,
+        all_teams=available_teams
     )
 
 
-# Добавление участника к мероприятию
 @app.route('/admin/events/<int:event_id>/participants/add', methods=['POST'])
 @login_required
 def admin_event_add_participant(event_id):
+    """Добавление участника или команды к мероприятию"""
     event = Event.query.get_or_404(event_id)
 
-    participant_id = request.form.get('participant_id')
+    participant_type = request.form.get('participant_type', 'individual')
+    participant_id = request.form.get('participant_id') if participant_type == 'individual' else None
+    team_id = request.form.get('team_id') if participant_type == 'team' else None
     place = request.form.get('place')
     score = request.form.get('score', 0)
     rating_change = request.form.get('rating_change', 0)
 
-    # Проверяем, что участник еще не добавлен к мероприятию
-    existing = EventParticipant.query.filter_by(
-        event_id=event_id,
-        participant_id=participant_id
-    ).first()
+    # Проверяем, что участник или команда еще не добавлены к мероприятию
+    if participant_type == 'individual':
+        existing = EventParticipant.query.filter_by(
+            event_id=event_id,
+            participant_id=participant_id
+        ).first()
+    else:
+        existing = EventParticipant.query.filter_by(
+            event_id=event_id,
+            team_id=team_id
+        ).first()
 
     if existing:
-        flash('Этот участник уже добавлен к мероприятию', 'danger')
+        if participant_type == 'individual':
+            flash('Этот участник уже добавлен к мероприятию', 'danger')
+        else:
+            flash('Эта команда уже добавлена к мероприятию', 'danger')
     else:
         participant_event = EventParticipant(
             event_id=event_id,
             participant_id=participant_id,
+            team_id=team_id,
+            is_team=(participant_type == 'team'),
             place=place if place else None,
-            score=float(score),
-            rating_change=int(rating_change)
+            score=float(score) if score else 0,
+            rating_change=int(rating_change) if rating_change else 0
         )
         db.session.add(participant_event)
         db.session.commit()
-        flash('Участник успешно добавлен к мероприятию', 'success')
+
+        if participant_type == 'individual':
+            flash('Участник успешно добавлен к мероприятию', 'success')
+        else:
+            flash('Команда успешно добавлена к мероприятию', 'success')
 
     return redirect(url_for('admin_event_participants', event_id=event_id))
 
@@ -472,6 +597,267 @@ def admin_event_calculate_rating(event_id):
         flash('Рейтинг участников успешно рассчитан. Изменения сохранены для просмотра.', 'success')
 
     return redirect(url_for('admin_event_participants', event_id=event_id))
+
+
+@app.route('/admin/teams')
+@login_required
+def admin_teams_list():
+    """Страница со списком команд"""
+    teams = Team.query.order_by(Team.name).all()
+    return render_template('admin/teams/list.html', teams=teams)
+
+
+@app.route('/admin/teams/create', methods=['GET', 'POST'])
+@login_required
+def admin_teams_create():
+    """Страница создания новой команды"""
+    if request.method == 'POST':
+        name = request.form.get('name')
+        organization = request.form.get('organization')
+        city = request.form.get('city')
+        description = request.form.get('description')
+        is_active = True if request.form.get('is_active') else False
+
+        team = Team(
+            name=name,
+            organization=organization,
+            city=city,
+            description=description,
+            is_active=is_active
+        )
+
+        # Обработка загрузки логотипа
+        if 'logo' in request.files:
+            file = request.files['logo']
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'teams', filename)
+                os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                file.save(filepath)
+                team.logo = f'uploads/teams/{filename}'
+
+        db.session.add(team)
+        db.session.commit()
+        flash('Команда успешно создана!', 'success')
+        return redirect(url_for('admin_teams_list'))
+
+    return render_template('admin/teams/create.html')
+
+
+@app.route('/admin/teams/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def admin_teams_edit(id):
+    """Страница редактирования команды"""
+    team = Team.query.get_or_404(id)
+
+    if request.method == 'POST':
+        team.name = request.form.get('name')
+        team.organization = request.form.get('organization')
+        team.city = request.form.get('city')
+        team.description = request.form.get('description')
+        team.is_active = True if request.form.get('is_active') else False
+
+        # Обработка загрузки логотипа
+        if 'logo' in request.files:
+            file = request.files['logo']
+            if file and file.filename:
+                if allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'teams', filename)
+                    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+                    file.save(filepath)
+
+                    # Удаляем старый логотип
+                    if team.logo:
+                        old_file = os.path.join(app.root_path, 'static', team.logo)
+                        if os.path.exists(old_file):
+                            os.remove(old_file)
+
+                    team.logo = f'uploads/teams/{filename}'
+
+        db.session.commit()
+        flash('Информация о команде успешно обновлена!', 'success')
+        return redirect(url_for('admin_teams_list'))
+
+    return render_template('admin/teams/edit.html', team=team)
+
+
+@app.route('/admin/teams/delete/<int:id>', methods=['POST'])
+@login_required
+def admin_teams_delete(id):
+    """Удаление команды"""
+    team = Team.query.get_or_404(id)
+
+    # Удаляем логотип
+    if team.logo:
+        file_path = os.path.join(app.root_path, 'static', team.logo)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    db.session.delete(team)
+    db.session.commit()
+    flash('Команда успешно удалена!', 'success')
+    return redirect(url_for('admin_teams_list'))
+
+
+# Team Members Management
+@app.route('/admin/teams/<int:team_id>/members')
+@login_required
+def admin_team_members(team_id):
+    """Страница управления участниками команды"""
+    team = Team.query.get_or_404(team_id)
+
+    # Получаем всех участников этой команды через связь TeamMember
+    members_query = db.session.query(
+        TeamMember,
+        Participant.name.label('participant_name'),
+        Participant.organization,
+        Participant.city,
+        TeamMember.role
+    ).join(
+        Participant, TeamMember.participant_id == Participant.id
+    ).filter(
+        TeamMember.team_id == team_id
+    ).all()
+
+    # Преобразуем результаты запроса в список словарей
+    members_data = []
+    for member, p_name, p_org, p_city, role in members_query:
+        members_data.append({
+            'id': member.id,
+            'participant_id': member.participant_id,
+            'participant_name': p_name,
+            'organization': p_org,
+            'city': p_city,
+            'role': role,
+            'joined_at': member.joined_at
+        })
+
+    # Для выпадающего списка при добавлении новых участников - получаем ВСЕХ участников
+    all_participants = Participant.query.order_by(Participant.name).all()
+
+    # Исключаем уже добавленных участников
+    added_participant_ids = [m['participant_id'] for m in members_data]
+
+    # Отладочные сообщения - раскомментируйте при необходимости
+    print(f"Всего участников в базе: {len(all_participants)}")
+    print(f"Участники в этой команде: {added_participant_ids}")
+
+    # Используем list comprehension для создания доступных участников
+    available_participants = [p for p in all_participants if p.id not in added_participant_ids]
+
+    # Отладочное сообщение
+    print(f"Доступно для добавления: {len(available_participants)}")
+
+    return render_template(
+        'admin/teams/members.html',
+        team=team,
+        members=members_data,
+        available_participants=available_participants
+    )
+
+
+@app.route('/admin/teams/<int:team_id>/members/add', methods=['POST'])
+@login_required
+def admin_team_add_member(team_id):
+    """Добавление участника в команду"""
+    team = Team.query.get_or_404(team_id)
+
+    participant_id = request.form.get('participant_id')
+    role = request.form.get('role', '')
+
+    # Отладка
+    print(f"Добавление участника в команду. Team ID: {team_id}, Participant ID: {participant_id}, Role: {role}")
+
+    # Проверка, что participant_id не пусто
+    if not participant_id:
+        flash('Необходимо выбрать участника', 'danger')
+        return redirect(url_for('admin_team_members', team_id=team_id))
+
+    # Убедимся, что участник существует
+    participant = Participant.query.get(participant_id)
+    if not participant:
+        flash('Выбранный участник не найден', 'danger')
+        return redirect(url_for('admin_team_members', team_id=team_id))
+
+    # Проверяем, что участник еще не добавлен в команду
+    existing = TeamMember.query.filter_by(
+        team_id=team_id,
+        participant_id=participant_id
+    ).first()
+
+    if existing:
+        flash('Этот участник уже добавлен в команду', 'danger')
+    else:
+        # Если устанавливается роль капитана, проверяем, нет ли уже капитана
+        if role == 'Капитан':
+            current_captain = TeamMember.query.filter_by(
+                team_id=team_id,
+                role='Капитан'
+            ).first()
+
+            if current_captain:
+                # Можно либо отклонить запрос, либо обновить текущего капитана
+                current_captain.role = 'Участник'  # Понижаем роль текущего капитана
+                db.session.flush()  # Фиксируем изменения
+
+        team_member = TeamMember(
+            team_id=team_id,
+            participant_id=participant_id,
+            role=role
+        )
+        db.session.add(team_member)
+
+        try:
+            db.session.commit()
+            flash('Участник успешно добавлен в команду', 'success')
+        except Exception as e:
+            db.session.rollback()
+            print(f"Ошибка добавления участника: {str(e)}")
+            flash(f'Ошибка добавления участника: {str(e)}', 'danger')
+
+    return redirect(url_for('admin_team_members', team_id=team_id))
+
+
+@app.route('/admin/teams/<int:team_id>/members/update', methods=['POST'])
+@login_required
+def admin_team_update_member(team_id):
+    """Обновление роли участника в команде"""
+    team = Team.query.get_or_404(team_id)
+
+    member_id = request.form.get('id')
+    role = request.form.get('role', '')
+
+    team_member = TeamMember.query.get_or_404(member_id)
+
+    if team_member.team_id != team_id:
+        flash('Ошибка: участник не принадлежит этой команде', 'danger')
+    else:
+        team_member.role = role
+        db.session.commit()
+        flash('Роль участника обновлена', 'success')
+
+    return redirect(url_for('admin_team_members', team_id=team_id))
+
+
+@app.route('/admin/teams/<int:team_id>/members/remove', methods=['POST'])
+@login_required
+def admin_team_remove_member(team_id):
+    """Удаление участника из команды"""
+    team = Team.query.get_or_404(team_id)
+
+    member_id = request.form.get('id')
+    team_member = TeamMember.query.get_or_404(member_id)
+
+    if team_member.team_id != team_id:
+        flash('Ошибка: участник не принадлежит этой команде', 'danger')
+    else:
+        db.session.delete(team_member)
+        db.session.commit()
+        flash('Участник удален из команды', 'success')
+
+    return redirect(url_for('admin_team_members', team_id=team_id))
+
 
 
 # Сброс результатов мероприятия

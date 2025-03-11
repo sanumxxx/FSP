@@ -328,13 +328,19 @@
         <div class="flex justify-center mb-6">
             <div class="inline-flex rounded-md shadow-sm" role="group">
                 <button id="filter-all" class="py-2 px-4 text-sm font-medium text-gray-800 bg-white rounded-l-lg border border-primary-DEFAULT hover:bg-gray-100 transition-colors filter-btn active">
-    Все участники
-</button>
+                    Все участники
+                </button>
                 <button id="filter-winners" class="py-2 px-4 text-sm font-medium text-primary-DEFAULT bg-white border-t border-b border-r border-primary-DEFAULT hover:text-white hover:bg-primary-DEFAULT transition-colors filter-btn">
                     Призеры
                 </button>
-                <button id="filter-top10" class="py-2 px-4 text-sm font-medium text-primary-DEFAULT bg-white border-t border-b border-r border-primary-DEFAULT hover:text-white hover:bg-primary-DEFAULT transition-colors rounded-r-lg filter-btn">
+                <button id="filter-top10" class="py-2 px-4 text-sm font-medium text-primary-DEFAULT bg-white border-t border-b border-r border-primary-DEFAULT hover:text-white hover:bg-primary-DEFAULT transition-colors filter-btn">
                     Топ-10
+                </button>
+                <button id="filter-individual" class="py-2 px-4 text-sm font-medium text-primary-DEFAULT bg-white border-t border-b border-r border-primary-DEFAULT hover:text-white hover:bg-primary-DEFAULT transition-colors filter-btn">
+                    Индивидуальные
+                </button>
+                <button id="filter-team" class="py-2 px-4 text-sm font-medium text-primary-DEFAULT bg-white border-t border-b border-r border-primary-DEFAULT hover:text-white hover:bg-primary-DEFAULT transition-colors rounded-r-lg filter-btn">
+                    Команды
                 </button>
             </div>
         </div>
@@ -344,9 +350,10 @@
             <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-lg">
                 <thead class="bg-gray-100 text-gray-700">
                     <tr>
-                        <th class="py-3 px-4 text-left" style="width: 10%">Место</th>
+                        <th class="py-3 px-4 text-left" style="width: 8%">Место</th>
                         <th class="py-3 px-4 text-left" style="width: 30%">Участник</th>
-                        <th class="py-3 px-4 text-left" style="width: 30%">Организация</th>
+                        <th class="py-3 px-4 text-left" style="width: 10%">Тип</th>
+                        <th class="py-3 px-4 text-left" style="width: 22%">Организация</th>
                         <th class="py-3 px-4 text-left" style="width: 15%">Город</th>
                         <th class="py-3 px-4 text-left" style="width: 15%">Баллы</th>
                     </tr>
@@ -354,7 +361,8 @@
                 <tbody id="participants-table">
                     {% for p in participants %}
                     <tr class="border-b hover:bg-gray-50 participant-row {% if p.place == 1 %}bg-green-50{% elif p.place == 2 or p.place == 3 %}bg-yellow-50{% endif %}"
-                        data-place="{{ p.place|default(999) }}">
+                        data-place="{{ p.place|default(999) }}"
+                        data-is-team="{{ 1 if p.is_team else 0 }}">
                         <td class="py-3 px-4">
                             {% if p.place %}
                                 {% if p.place == 1 %}
@@ -380,6 +388,13 @@
                             {% endif %}
                         </td>
                         <td class="py-3 px-4 font-medium">{{ p.participant_name }}</td>
+                        <td class="py-3 px-4">
+                            {% if p.is_team %}
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">Команда</span>
+                            {% else %}
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Участник</span>
+                            {% endif %}
+                        </td>
                         <td class="py-3 px-4">{{ p.organization }}</td>
                         <td class="py-3 px-4">{{ p.city }}</td>
                         <td class="py-3 px-4">{{ p.score }}</td>
@@ -406,15 +421,15 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div class="text-center bg-gray-50 p-4 rounded-lg">
                             <div class="text-3xl font-bold text-primary-dark mb-1">{{ participants|length }}</div>
-                            <div class="text-gray-600">Участников</div>
+                            <div class="text-gray-600">Всего</div>
                         </div>
                         <div class="text-center bg-gray-50 p-4 rounded-lg">
-                            <div class="text-3xl font-bold text-primary-dark mb-1">{{ participants|map(attribute='organization')|unique|list|length }}</div>
-                            <div class="text-gray-600">Организаций</div>
+                            <div class="text-3xl font-bold text-primary-dark mb-1">{{ participants|selectattr('is_team', 'defined')|selectattr('is_team', 'equalto', true)|list|length }}</div>
+                            <div class="text-gray-600">Команд</div>
                         </div>
                         <div class="text-center bg-gray-50 p-4 rounded-lg">
-                            <div class="text-3xl font-bold text-primary-dark mb-1">{{ participants|map(attribute='city')|unique|list|length }}</div>
-                            <div class="text-gray-600">Городов</div>
+                            <div class="text-3xl font-bold text-primary-dark mb-1">{{ participants|selectattr('is_team', 'undefined')|list|length + participants|selectattr('is_team', 'defined')|selectattr('is_team', 'equalto', false)|list|length }}</div>
+                            <div class="text-gray-600">Индивидуальных</div>
                         </div>
                         <div class="text-center bg-gray-50 p-4 rounded-lg">
                             <div class="text-3xl font-bold text-primary-dark mb-1">{{ participants|selectattr('place', 'defined')|selectattr('place', 'le', 3)|list|length }}</div>
@@ -468,6 +483,89 @@
             'albumLabel': "Изображение %1 из %2"
         });
     </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Фильтрация участников
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const rows = document.querySelectorAll('.participant-row');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Убираем активный класс со всех кнопок
+                filterButtons.forEach(btn => {
+                    btn.classList.remove('active', 'text-white', 'bg-primary-DEFAULT');
+                    btn.classList.add('text-primary-DEFAULT', 'bg-white');
+                });
+
+                // Добавляем активный класс нажатой кнопке
+                this.classList.add('active', 'text-white', 'bg-primary-DEFAULT');
+                this.classList.remove('text-primary-DEFAULT', 'bg-white');
+
+                // Фильтруем строки таблицы
+                const filterId = this.id;
+
+                rows.forEach(row => {
+                    const place = parseInt(row.dataset.place);
+                    const isTeam = parseInt(row.dataset.isTeam);
+
+                    if (filterId === 'filter-all') {
+                        row.style.display = '';
+                    } else if (filterId === 'filter-winners' && place <= 3) {
+                        row.style.display = '';
+                    } else if (filterId === 'filter-top10' && place <= 10) {
+                        row.style.display = '';
+                    } else if (filterId === 'filter-individual' && isTeam === 0) {
+                        row.style.display = '';
+                    } else if (filterId === 'filter-team' && isTeam === 1) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Создание диаграммы распределения по городам
+        {% if participants %}
+        const cities = {};
+        {% for p in participants %}
+            if ('{{ p.city }}' in cities) {
+                cities['{{ p.city }}']++;
+            } else {
+                cities['{{ p.city }}'] = 1;
+            }
+        {% endfor %}
+
+        const cityLabels = Object.keys(cities);
+        const cityData = Object.values(cities);
+        const cityColors = cityLabels.map((_, i) =>
+            `hsl(${220 + i * 30}, 70%, ${50 + i * 5}%)`
+        );
+
+        const citiesCtx = document.getElementById('citiesChart').getContext('2d');
+        new Chart(citiesCtx, {
+            type: 'pie',
+            data: {
+                labels: cityLabels,
+                datasets: [{
+                    data: cityData,
+                    backgroundColor: cityColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+        {% endif %}
+    });
+</script>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Фильтрация участников
