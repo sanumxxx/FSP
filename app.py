@@ -91,6 +91,7 @@ class EventParticipant(db.Model):
     score = db.Column(db.Float, default=0)
     rating_change = db.Column(db.Integer, default=0)
     is_team = db.Column(db.Boolean, default=False)  # Flag to indicate if this is a team entry
+    published = db.Column(db.Boolean, default=False)  # Flag to control visibility on the public site
 
     # Add a CheckConstraint to ensure at least one of participant_id or team_id is not null
     __table_args__ = (
@@ -154,6 +155,8 @@ class Event(db.Model):
     published = db.Column(db.Boolean, default=True)
     # New field for discipline
     discipline = db.Column(db.String(50), default='other')  # 'algorithmic', 'product', 'robotics', 'other'
+    # New field for organizer
+    organizer = db.Column(db.String(200), default='Федерация спортивного программирования ЗО')
 
     def __repr__(self):
         return f'<Event {self.title}>'
@@ -291,7 +294,8 @@ def admin_event_participants(event_id):
             'city': p_city,
             'place': p_event.place,
             'score': p_event.score,
-            'rating_change': p_event.rating_change
+            'rating_change': p_event.rating_change,
+            'published': p_event.published if hasattr(p_event, 'published') else False
         })
 
     # Получаем команды этого мероприятия
@@ -320,7 +324,8 @@ def admin_event_participants(event_id):
             'city': t_city,
             'place': p_event.place,
             'score': p_event.score,
-            'rating_change': p_event.rating_change
+            'rating_change': p_event.rating_change,
+            'published': p_event.published if hasattr(p_event, 'published') else False
         })
 
     # Объединяем данные для отображения в шаблоне
@@ -1181,6 +1186,7 @@ def admin_events_create():
         registration_link = request.form.get('registration_link')
         published = True if request.form.get('published') else False
         discipline = request.form.get('discipline', 'other')  # Дисциплина, по умолчанию 'other'
+        organizer = request.form.get('organizer', 'Федерация спортивного программирования ЗО')
 
         event = Event(
             title=title,
@@ -1190,7 +1196,8 @@ def admin_events_create():
             end_date=end_date,
             registration_link=registration_link,
             published=published,
-            discipline=discipline
+            discipline=discipline,
+            organizer=organizer
         )
 
         # Обработка загрузки изображения
@@ -1226,6 +1233,7 @@ def admin_events_edit(id):
         event.registration_link = request.form.get('registration_link')
         event.published = True if request.form.get('published') else False
         event.discipline = request.form.get('discipline', 'other')  # Обновление дисциплины
+        event.organizer = request.form.get('organizer', 'Федерация спортивного программирования ЗО')
 
         # Обработка загрузки изображения
         if 'image' in request.files:
@@ -1815,8 +1823,8 @@ def event_detail(id):
     # Получаем фотографии из галереи, связанные с этим мероприятием
     gallery_items = Gallery.query.filter_by(event_id=id).all()
 
-    # Получаем участников этого мероприятия
-    participants_data = db.session.query(
+    # Получаем индивидуальных участников этого мероприятия (только опубликованные)
+    individual_participants = db.session.query(
         EventParticipant,
         Participant.name.label('participant_name'),
         Participant.organization,
@@ -1824,26 +1832,33 @@ def event_detail(id):
     ).join(
         Participant, EventParticipant.participant_id == Participant.id
     ).filter(
-        EventParticipant.event_id == id
-    ).order_by(
-        EventParticipant.place.nulls_last(),  # Сначала с указанным местом
-        EventParticipant.score.desc()  # Затем по убыванию баллов
+        EventParticipant.event_id == id,
+        EventParticipant.participant_id != None,
+        EventParticipant.published == True  # Only published participants
     ).all()
 
-    # Вывод логов для отладки
-    print(f"Найдено {len(participants_data)} участников для мероприятия ID={id}")
+    # Получаем команды этого мероприятия (только опубликованные)
+    team_participants = db.session.query(
+        EventParticipant,
+        Team.name.label('participant_name'),
+        Team.organization,
+        Team.city
+    ).join(
+        Team, EventParticipant.team_id == Team.id
+    ).filter(
+        EventParticipant.event_id == id,
+        EventParticipant.team_id != None,
+        EventParticipant.published == True  # Only published participants
+    ).all()
 
-    # Создаем список участников для шаблона
-    participants = []
-    for row in participants_data:
-        p_event = row[0]  # объект EventParticipant
-        p_name = row[1]  # имя участника
-        p_org = row[2]  # организация
-        p_city = row[3]  # город
-
-        participants.append({
+    # Преобразуем результаты запросов в списки словарей
+    individual_data = []
+    for p_event, p_name, p_org, p_city in individual_participants:
+        individual_data.append({
             'id': p_event.id,
             'participant_id': p_event.participant_id,
+            'team_id': None,
+            'is_team': False,
             'participant_name': p_name,
             'organization': p_org,
             'city': p_city,
@@ -1852,19 +1867,56 @@ def event_detail(id):
             'rating_change': p_event.rating_change
         })
 
-    print(f"Преобразовано {len(participants)} участников")
+    team_data = []
+    for p_event, t_name, t_org, t_city in team_participants:
+        team_data.append({
+            'id': p_event.id,
+            'participant_id': None,
+            'team_id': p_event.team_id,
+            'is_team': True,
+            'participant_name': t_name,
+            'organization': t_org,
+            'city': t_city,
+            'place': p_event.place,
+            'score': p_event.score,
+            'rating_change': p_event.rating_change
+        })
 
-    # Можно добавить отладочные данные для отображения в шаблоне
-    debug_info = {
-        'participants_count': len(participants),
-        'has_participants': len(participants) > 0
-    }
+    # Объединяем данные
+    participants = individual_data + team_data
+
+    # Сортируем по месту (сначала с указанным местом, потом все остальные)
+    participants.sort(key=lambda x: (x['place'] is None, x['place']))
 
     return render_template('event_detail.html',
                            event=event,
                            gallery_items=gallery_items,
                            participants=participants,
-                           debug_info=debug_info)
+                           debug_info={'participants_count': len(participants)})
+
+
+@app.route('/admin/events/<int:event_id>/participants/toggle-publish', methods=['POST'])
+@login_required
+def admin_event_toggle_publish_participant(event_id):
+    """Изменение статуса публикации участника или команды в мероприятии"""
+    event = Event.query.get_or_404(event_id)
+
+    participant_id = request.form.get('participant_id')
+    published = request.form.get('published') == 'true'
+
+    participant_event = EventParticipant.query.get_or_404(participant_id)
+
+    if participant_event.event_id != event_id:
+        return jsonify({'success': False, 'message': 'Ошибка: участник не принадлежит этому мероприятию'})
+
+    participant_event.published = published
+    db.session.commit()
+
+    return jsonify({
+        'success': True,
+        'message': f'Участник {"опубликован" if published else "скрыт"}',
+        'published': published
+    })
 
 
 def generate_calendar_data(year=None, month=None):

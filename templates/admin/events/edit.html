@@ -60,6 +60,11 @@
                 <div class="form-text">Необязательно. Если указана, на странице мероприятия будет отображаться кнопка "Регистрация".</div>
             </div>
             <div class="mb-3">
+    <label for="organizer" class="form-label">Организатор</label>
+    <input type="text" class="form-control" id="organizer" name="organizer" value="{{ event.organizer }}">
+    <div class="form-text">Название организации, проводящей мероприятие</div>
+</div>
+            <div class="mb-3">
     <label for="discipline" class="form-label">Дисциплина</label>
     <select class="form-select" id="discipline" name="discipline" required>
         <option value="algorithmic" {% if event.discipline == 'algorithmic' %}selected{% endif %}>Алгоритмическое программирование</option>

@@ -162,7 +162,7 @@
                                 </div>
                                 <div>
                                     <h3 class="font-bold text-gray-700">Организатор</h3>
-                                    <p>Федерация спортивного программирования ЗО</p>
+                                    <p>{{ event.organizer }}</p>
                                 </div>
                             </div>
                         </div>
@@ -348,7 +348,7 @@
         <!-- Таблица с участниками -->
         <div class="overflow-x-auto">
             <table class="min-w-full bg-white rounded-lg overflow-hidden shadow-lg">
-                <thead class="bg-gray-100 text-gray-700">
+                <thead class="bg-primary-DEFAULT text-white">
                     <tr>
                         <th class="py-3 px-4 text-left" style="width: 8%">Место</th>
                         <th class="py-3 px-4 text-left" style="width: 30%">Участник</th>
@@ -432,7 +432,7 @@
                             <div class="text-gray-600">Индивидуальных</div>
                         </div>
                         <div class="text-center bg-gray-50 p-4 rounded-lg">
-                            <div class="text-3xl font-bold text-primary-dark mb-1">{{ participants|selectattr('place', 'defined')|selectattr('place', 'le', 3)|list|length }}</div>
+                            <div class="text-3xl font-bold text-primary-dark mb-1">{{ participants|selectattr('place', 'defined')|rejectattr('place', 'none')|selectattr('place', 'le', 3)|list|length }}</div>
                             <div class="text-gray-600">Призеров</div>
                         </div>
                     </div>
@@ -505,7 +505,7 @@
                 const filterId = this.id;
 
                 rows.forEach(row => {
-                    const place = parseInt(row.dataset.place);
+                    const place = parseInt(row.dataset.place) || 999; // Default to 999 if null/undefined
                     const isTeam = parseInt(row.dataset.isTeam);
 
                     if (filterId === 'filter-all') {
@@ -542,104 +542,30 @@
             `hsl(${220 + i * 30}, 70%, ${50 + i * 5}%)`
         );
 
-        const citiesCtx = document.getElementById('citiesChart').getContext('2d');
-        new Chart(citiesCtx, {
-            type: 'pie',
-            data: {
-                labels: cityLabels,
-                datasets: [{
-                    data: cityData,
-                    backgroundColor: cityColors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right'
+        const citiesCtx = document.getElementById('citiesChart');
+        if (citiesCtx) {
+            const ctx = citiesCtx.getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: cityLabels,
+                    datasets: [{
+                        data: cityData,
+                        backgroundColor: cityColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
                     }
                 }
-            }
-        });
-        {% endif %}
-    });
-</script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Фильтрация участников
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        const rows = document.querySelectorAll('.participant-row');
-
-        filterButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // Убираем активный класс со всех кнопок
-                filterButtons.forEach(btn => {
-                    btn.classList.remove('active', 'text-white', 'bg-primary-DEFAULT');
-                    btn.classList.add('text-primary-DEFAULT', 'bg-white');
-                });
-
-                // Добавляем активный класс нажатой кнопке
-                this.classList.add('active', 'text-white', 'bg-primary-DEFAULT');
-                this.classList.remove('text-primary-DEFAULT', 'bg-white');
-
-                // Фильтруем строки таблицы
-                const filterId = this.id;
-
-                rows.forEach(row => {
-                    const place = parseInt(row.dataset.place);
-                    if (filterId === 'filter-all') {
-                        row.style.display = '';
-                    } else if (filterId === 'filter-winners' && place <= 3) {
-                        row.style.display = '';
-                    } else if (filterId === 'filter-top10' && place <= 10) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
             });
-        });
-
-        // Создание диаграммы распределения по городам
-        {% if participants %}
-        const cities = {};
-        {% for p in participants %}
-            if ('{{ p.city }}' in cities) {
-                cities['{{ p.city }}']++;
-            } else {
-                cities['{{ p.city }}'] = 1;
-            }
-        {% endfor %}
-
-        const cityLabels = Object.keys(cities);
-        const cityData = Object.values(cities);
-        const cityColors = cityLabels.map((_, i) =>
-            `hsl(${220 + i * 30}, 70%, ${50 + i * 5}%)`
-        );
-
-        const citiesCtx = document.getElementById('citiesChart').getContext('2d');
-        new Chart(citiesCtx, {
-            type: 'pie',
-            data: {
-                labels: cityLabels,
-                datasets: [{
-                    data: cityData,
-                    backgroundColor: cityColors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right'
-                    }
-                }
-            }
-        });
+        }
         {% endif %}
     });
 </script>

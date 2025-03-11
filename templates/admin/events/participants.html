@@ -1,4 +1,4 @@
-{# templates/admin/events/participants.html - Updated version #}
+{# templates/admin/events/participants.html #}
 {% extends 'admin/base.html' %}
 
 {% block title %}Участники мероприятия | Админ-панель ФСПЗО{% endblock %}
@@ -29,6 +29,18 @@
     .badge-individual {
         background-color: #0d6efd;
         color: white;
+    }
+
+    /* Стиль для переключателя публикации */
+    .form-switch {
+        padding-left: 2.5em;
+    }
+    .form-switch .form-check-input {
+        width: 2em;
+    }
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
     }
 </style>
 {% endblock %}
@@ -148,6 +160,7 @@
                                         <th data-sortable="true" data-field="city">Город</th>
                                         <th data-sortable="true" data-field="score">Баллы</th>
                                         <th data-sortable="true" data-field="rating_change">Δ Рейтинг</th>
+                                        <th data-sortable="true" data-field="published">Опубликован</th>
                                         <th data-field="actions">Действия</th>
                                     </tr>
                                 </thead>
@@ -156,15 +169,22 @@
                                     <tr class="{% if participant.place == 1 %}table-success{% elif participant.place == 2 or participant.place == 3 %}table-warning{% endif %}">
                                         <td>{{ participant.place if participant.place else '-' }}</td>
                                         <td>
-                                            {% if participant.is_team %}
-                                            <a href="{{ url_for('admin_teams_edit', id=participant.team_id) }}" target="_blank">
-                                                {{ participant.participant_name }}
-                                            </a>
-                                            {% else %}
-                                            <a href="{{ url_for('admin_participants_edit', id=participant.participant_id) }}" target="_blank">
-                                                {{ participant.participant_name }}
-                                            </a>
-                                            {% endif %}
+                                            <div class="d-flex align-items-center">
+                                                <div class="member-avatar me-2">
+                                                    {{ participant.participant_name[0]|upper }}
+                                                </div>
+                                                <div>
+                                                    {% if participant.is_team %}
+                                                    <a href="{{ url_for('admin_teams_edit', id=participant.team_id) }}" target="_blank">
+                                                        {{ participant.participant_name }}
+                                                    </a>
+                                                    {% else %}
+                                                    <a href="{{ url_for('admin_participants_edit', id=participant.participant_id) }}" target="_blank">
+                                                        {{ participant.participant_name }}
+                                                    </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             {% if participant.is_team %}
@@ -186,19 +206,28 @@
                                             {% endif %}
                                         </td>
                                         <td>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input toggle-publish" type="checkbox"
+                                                       data-id="{{ participant.id }}"
+                                                       data-event-id="{{ event.id }}"
+                                                       {% if participant.published|default(false) %}checked{% endif %}>
+                                            </div>
+                                        </td>
+                                        <td>
                                             <button type="button" class="btn btn-sm btn-outline-primary edit-participant"
-                                                data-id="{{ participant.id }}"
-                                                data-name="{{ participant.participant_name }}"
-                                                data-place="{{ participant.place }}"
-                                                data-score="{{ participant.score }}"
-                                                data-rating-change="{{ participant.rating_change }}"
-                                                data-is-team="{{ participant.is_team|int }}">
+                                                    data-id="{{ participant.id }}"
+                                                    data-name="{{ participant.participant_name }}"
+                                                    data-place="{{ participant.place }}"
+                                                    data-score="{{ participant.score }}"
+                                                    data-rating-change="{{ participant.rating_change }}"
+                                                    data-is-team="{{ participant.is_team|int }}"
+                                                    data-published="{{ participant.published|default(0)|int }}">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-outline-danger delete-participant"
-                                                data-id="{{ participant.id }}"
-                                                data-name="{{ participant.participant_name }}"
-                                                data-is-team="{{ participant.is_team|int }}">
+                                                    data-id="{{ participant.id }}"
+                                                    data-name="{{ participant.participant_name }}"
+                                                    data-is-team="{{ participant.is_team|int }}">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
@@ -229,6 +258,7 @@
                                         <th data-sortable="true" data-field="city">Город</th>
                                         <th data-sortable="true" data-field="score">Баллы</th>
                                         <th data-sortable="true" data-field="rating_change">Δ Рейтинг</th>
+                                        <th data-sortable="true" data-field="published">Опубликован</th>
                                         <th data-field="actions">Действия</th>
                                     </tr>
                                 </thead>
@@ -254,19 +284,28 @@
                                             {% endif %}
                                         </td>
                                         <td>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input toggle-publish" type="checkbox"
+                                                       data-id="{{ participant.id }}"
+                                                       data-event-id="{{ event.id }}"
+                                                       {% if participant.published|default(false) %}checked{% endif %}>
+                                            </div>
+                                        </td>
+                                        <td>
                                             <button type="button" class="btn btn-sm btn-outline-primary edit-participant"
-                                                data-id="{{ participant.id }}"
-                                                data-name="{{ participant.participant_name }}"
-                                                data-place="{{ participant.place }}"
-                                                data-score="{{ participant.score }}"
-                                                data-rating-change="{{ participant.rating_change }}"
-                                                data-is-team="0">
+                                                    data-id="{{ participant.id }}"
+                                                    data-name="{{ participant.participant_name }}"
+                                                    data-place="{{ participant.place }}"
+                                                    data-score="{{ participant.score }}"
+                                                    data-rating-change="{{ participant.rating_change }}"
+                                                    data-is-team="0"
+                                                    data-published="{{ participant.published|default(0)|int }}">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-outline-danger delete-participant"
-                                                data-id="{{ participant.id }}"
-                                                data-name="{{ participant.participant_name }}"
-                                                data-is-team="0">
+                                                    data-id="{{ participant.id }}"
+                                                    data-name="{{ participant.participant_name }}"
+                                                    data-is-team="0">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
@@ -297,6 +336,7 @@
                                         <th data-sortable="true" data-field="city">Город</th>
                                         <th data-sortable="true" data-field="score">Баллы</th>
                                         <th data-sortable="true" data-field="rating_change">Δ Рейтинг</th>
+                                        <th data-sortable="true" data-field="published">Опубликован</th>
                                         <th data-field="actions">Действия</th>
                                     </tr>
                                 </thead>
@@ -322,19 +362,28 @@
                                             {% endif %}
                                         </td>
                                         <td>
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input toggle-publish" type="checkbox"
+                                                       data-id="{{ participant.id }}"
+                                                       data-event-id="{{ event.id }}"
+                                                       {% if participant.published|default(false) %}checked{% endif %}>
+                                            </div>
+                                        </td>
+                                        <td>
                                             <button type="button" class="btn btn-sm btn-outline-primary edit-participant"
-                                                data-id="{{ participant.id }}"
-                                                data-name="{{ participant.participant_name }}"
-                                                data-place="{{ participant.place }}"
-                                                data-score="{{ participant.score }}"
-                                                data-rating-change="{{ participant.rating_change }}"
-                                                data-is-team="1">
+                                                    data-id="{{ participant.id }}"
+                                                    data-name="{{ participant.participant_name }}"
+                                                    data-place="{{ participant.place }}"
+                                                    data-score="{{ participant.score }}"
+                                                    data-rating-change="{{ participant.rating_change }}"
+                                                    data-is-team="1"
+                                                    data-published="{{ participant.published|default(0)|int }}">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
                                             <button type="button" class="btn btn-sm btn-outline-danger delete-participant"
-                                                data-id="{{ participant.id }}"
-                                                data-name="{{ participant.participant_name }}"
-                                                data-is-team="1">
+                                                    data-id="{{ participant.id }}"
+                                                    data-name="{{ participant.participant_name }}"
+                                                    data-is-team="1">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
@@ -384,6 +433,11 @@
                         <input type="number" class="form-control" id="rating_change" name="rating_change" value="0">
                         <div class="form-text">Положительное или отрицательное число</div>
                     </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="published" name="published" checked>
+                        <label class="form-check-label" for="published">Опубликовать на сайте</label>
+                        <div class="form-text">Если отмечено, участник будет отображаться на публичной странице мероприятия</div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -428,6 +482,11 @@
                         <input type="number" class="form-control" id="team_rating_change" name="rating_change" value="0">
                         <div class="form-text">Положительное или отрицательное число</div>
                     </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="team_published" name="published" checked>
+                        <label class="form-check-label" for="team_published">Опубликовать на сайте</label>
+                        <div class="form-text">Если отмечено, команда будет отображаться на публичной странице мероприятия</div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -468,6 +527,11 @@
                         <input type="number" class="form-control" id="edit_rating_change" name="rating_change">
                         <div class="form-text">Положительное или отрицательное число</div>
                     </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_published" name="published">
+                        <label class="form-check-label" for="edit_published">Опубликовать на сайте</label>
+                        <div class="form-text">Если отмечено, участник будет отображаться на публичной странице мероприятия</div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -501,9 +565,116 @@
     </div>
 </div>
 
-<!-- Оставляем без изменений модальные окна для импорта, рассчета рейтинга и сброса результатов -->
-<!-- ... -->
+<!-- Модальное окно импорта участников из CSV -->
+<div class="modal fade" id="importParticipantsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Импорт участников из CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="import-form" action="{{ url_for('admin_event_import_participants', event_id=event.id) }}" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="participants_file" class="form-label">Выберите CSV-файл</label>
+                        <input type="file" class="form-control" id="participants_file" name="participants_file" accept=".csv" required>
+                        <div class="form-text">Формат CSV: Имя,Организация,Город,Место,Баллы</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="create_missing" name="create_missing">
+                        <label class="form-check-label" for="create_missing">Создавать новых участников</label>
+                        <div class="form-text">Если участник не найден в базе, он будет создан автоматически</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="overwrite_existing" name="overwrite_existing">
+                        <label class="form-check-label" for="overwrite_existing">Перезаписывать существующие данные</label>
+                        <div class="form-text">Если участник уже добавлен в мероприятие, его данные будут обновлены</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="import_published" name="import_published" checked>
+                        <label class="form-check-label" for="import_published">Опубликовать импортированных участников</label>
+                        <div class="form-text">Если отмечено, импортированные участники будут автоматически опубликованы</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="import-form" class="btn btn-primary">Импортировать</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- Модальное окно расчета рейтинга -->
+<div class="modal fade" id="calculateRatingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Рассчитать рейтинг</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="calculate-rating-form" action="{{ url_for('admin_event_calculate_rating', event_id=event.id) }}" method="post">
+                    <div class="mb-3">
+                        <label for="rating_method" class="form-label">Метод расчета</label>
+                        <select class="form-select" id="rating_method" name="rating_method">
+                            <option value="standard">Стандартный (по местам)</option>
+                            <option value="score">По баллам</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="event_weight" class="form-label">Вес мероприятия</label>
+                        <input type="number" class="form-control" id="event_weight" name="event_weight" value="1" min="1" max="10">
+                        <div class="form-text">Множитель для рейтинговых очков (1-10)</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="first_place_points" class="form-label">Очки за первое место</label>
+                        <input type="number" class="form-control" id="first_place_points" name="first_place_points" value="100" min="1">
+                        <div class="form-text">Базовое количество очков за первое место</div>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="apply_immediately" name="apply_immediately">
+                        <label class="form-check-label" for="apply_immediately">Применить немедленно</label>
+                        <div class="form-text">Если отмечено, изменения рейтинга будут сразу применены к общему рейтингу участников</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="submit" form="calculate-rating-form" class="btn btn-primary">Рассчитать</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения сброса результатов -->
+<div class="modal fade" id="confirmClearModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение сброса результатов</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    Внимание! Это действие сбросит все места, баллы и изменения рейтинга участников.
+                </div>
+                <p>Вы уверены, что хотите сбросить результаты мероприятия?</p>
+                <p class="text-muted">При этом участники останутся прикрепленными к мероприятию.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <form action="{{ url_for('admin_event_clear_results', event_id=event.id) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Сбросить результаты</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Контейнер для уведомлений -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 {% endblock %}
 
 {% block extra_js %}
@@ -547,6 +718,7 @@
             const score = $(this).data('score');
             const ratingChange = $(this).data('rating-change');
             const isTeam = $(this).data('is-team');
+            const published = $(this).data('published') === 1;
 
             $('#edit_id').val(id);
             $('#edit_participant_name').val(name);
@@ -554,6 +726,7 @@
             $('#edit_score').val(score);
             $('#edit_rating_change').val(ratingChange);
             $('#edit_is_team').val(isTeam);
+            $('#edit_published').prop('checked', published);
 
             $('#editParticipantModal').modal('show');
         });
@@ -570,6 +743,61 @@
 
             $('#deleteParticipantModal').modal('show');
         });
+
+        // Обработчик переключения публикации участника
+        $('.toggle-publish').on('change', function() {
+            const participantId = $(this).data('id');
+            const eventId = $(this).data('event-id');
+            const isPublished = $(this).prop('checked');
+
+            $.ajax({
+                url: `/admin/events/${eventId}/participants/toggle-publish`,
+                method: 'POST',
+                data: {
+                    participant_id: participantId,
+                    published: isPublished
+                },
+                success: function(response) {
+                    if (response.success) {
+                        showToast(response.message, 'success');
+                    } else {
+                        showToast(response.message, 'danger');
+                        // Если произошла ошибка, вернуть чекбокс в исходное состояние
+                        $(`.toggle-publish[data-id="${participantId}"]`).prop('checked', !isPublished);
+                    }
+                },
+                error: function() {
+                    showToast('Ошибка при изменении статуса публикации', 'danger');
+                    // Если произошла ошибка, вернуть чекбокс в исходное состояние
+                    $(`.toggle-publish[data-id="${participantId}"]`).prop('checked', !isPublished);
+                }
+            });
+        });
+
+        // Функция для отображения сообщений пользователю
+        function showToast(message, type = 'success') {
+            const toast = $(`
+                <div class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `);
+
+            $('.toast-container').append(toast);
+            const bsToast = new bootstrap.Toast(toast, {
+                delay: 3000
+            });
+            bsToast.show();
+
+            // Удалить toast после скрытия
+            toast.on('hidden.bs.toast', function() {
+                $(this).remove();
+            });
+        }
     });
 </script>
 {% endblock %}
