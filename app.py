@@ -996,9 +996,21 @@ def logout():
 
 
 # Функция для проверки разрешенных типов файлов
-def allowed_file(filename):
+def allowed_file(filename, fileobj=None):
+    # Проверка расширения
     ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    extension_ok = '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+    # Проверка размера файла, если объект предоставлен
+    if fileobj and extension_ok:
+        MAX_SIZE = 15 * 1024 * 1024  # 15MB
+        fileobj.seek(0, os.SEEK_END)
+        size = fileobj.tell()
+        fileobj.seek(0)  # Сброс указателя в начало
+        return size <= MAX_SIZE
+
+    return extension_ok
+
 
 
 # Роуты администрирования
@@ -1178,43 +1190,96 @@ def admin_events_list():
 @login_required
 def admin_events_create():
     if request.method == 'POST':
-        title = request.form.get('title')
-        description = request.form.get('description')
-        location = request.form.get('location')
-        start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d %H:%M')
-        end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d %H:%M')
-        registration_link = request.form.get('registration_link')
-        published = True if request.form.get('published') else False
-        discipline = request.form.get('discipline', 'other')  # Дисциплина, по умолчанию 'other'
-        organizer = request.form.get('organizer', 'Федерация спортивного программирования ЗО')
+        try:
+            # Получаем данные из формы
+            title = request.form.get('title')
+            description = request.form.get('description')
+            location = request.form.get('location')
+            start_date = datetime.strptime(request.form.get('start_date'), '%Y-%m-%d %H:%M')
+            end_date = datetime.strptime(request.form.get('end_date'), '%Y-%m-%d %H:%M')
+            registration_link = request.form.get('registration_link')
+            published = True if request.form.get('published') else False
+            discipline = request.form.get('discipline', 'other')
+            organizer = request.form.get('organizer', 'Федерация спортивного программирования ЗО')
 
-        event = Event(
-            title=title,
-            description=description,
-            location=location,
-            start_date=start_date,
-            end_date=end_date,
-            registration_link=registration_link,
-            published=published,
-            discipline=discipline,
-            organizer=organizer
-        )
+            # Создаем новое событие
+            event = Event(
+                title=title,
+                description=description,
+                location=location,
+                start_date=start_date,
+                end_date=end_date,
+                registration_link=registration_link,
+                published=published,
+                discipline=discipline,
+                organizer=organizer
+            )
 
-        # Обработка загрузки изображения
-        if 'image' in request.files:
-            file = request.files['image']
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'events', filename)
-                os.makedirs(os.path.dirname(filepath), exist_ok=True)
-                file.save(filepath)
-                event.image = f'uploads/events/{filename}'
+            # Обработка загрузки изображения
+            if 'image' in request.files:
+                file = request.files['image']
+                if file and file.filename.strip():
+                    # Проверяем расширение файла
+                    if allowed_file(file.filename):
+                        # Безопасное имя файла
+                        filename = secure_filename(file.filename)
+                        filename_base, filename_ext = os.path.splitext(filename)
+                        # Добавляем временную метку для уникальности
+                        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                        filename = f"{filename_base}_{timestamp}{filename_ext}"
 
-        db.session.add(event)
-        db.session.commit()
-        flash('Мероприятие успешно создано!', 'success')
-        return redirect(url_for('admin_events_list'))
+                        # Создаем директорию, если её нет
+                        upload_folder = os.path.join(app.config['UPLOAD_FOLDER'], 'events')
+                        os.makedirs(upload_folder, exist_ok=True)
+                        filepath = os.path.join(upload_folder, filename)
 
+                        # Сохраняем и оптимизируем изображение с помощью Pillow
+                        from PIL import Image, ImageOps
+                        import io
+
+                        # Открываем изображение из потока
+                        img = Image.open(file)
+
+                        # Правильная ориентация по EXIF (если есть)
+                        img = ImageOps.exif_transpose(img)
+
+                        # Преобразуем в RGB (убираем альфа-канал, если есть)
+                        if img.mode in ['RGBA', 'LA', 'P']:
+                            img = img.convert('RGB')
+
+                        # Изменяем размер для веб-оптимизации
+                        max_size = (1200, 800)  # Подходящий размер для мероприятий
+                        img.thumbnail(max_size, Image.LANCZOS)
+
+                        # Сохраняем оптимизированное изображение
+                        img.save(
+                            filepath,
+                            format='JPEG',
+                            optimize=True,
+                            quality=85,  # Баланс между качеством и размером
+                            progressive=True  # Прогрессивная загрузка
+                        )
+
+                        # Сохраняем путь в объект мероприятия
+                        event.image = f'uploads/events/{filename}'
+                    else:
+                        flash('Недопустимый формат файла. Используйте JPG, PNG или GIF.', 'danger')
+                        return render_template('admin/events/create.html')
+
+            # Сохраняем в базу данных
+            db.session.add(event)
+            db.session.commit()
+            flash('Мероприятие успешно создано!', 'success')
+            return redirect(url_for('admin_events_list'))
+
+        except Exception as e:
+            # Обработка возможных ошибок
+            db.session.rollback()
+            flash(f'Ошибка при создании мероприятия: {str(e)}', 'danger')
+            app.logger.error(f"Error creating event: {str(e)}")
+            return render_template('admin/events/create.html')
+
+    # GET запрос - просто отображаем форму
     return render_template('admin/events/create.html')
 
 
